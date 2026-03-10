@@ -1,0 +1,7 @@
+.env
+venv
+venv/
+__pycache__/
+all_in_one_law_folder/
+test.py
+.streamlit/secrets.toml
