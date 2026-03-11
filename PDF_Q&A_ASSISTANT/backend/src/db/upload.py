@@ -22,7 +22,7 @@ def process_uploaded_files(uploaded_files) -> dict:
         pinecone_connection()
 
         with tempfile.TemporaryDirectory() as tmpdirname:
-            file_paths = [r"C:\Users\vamsi\Downloads\Vamsi_B_Resume.pdf"]
+            file_paths = []
             for uploaded_file in uploaded_files:
                 file_path = os.path.join(tmpdirname, uploaded_file.filename)
                 with open(file_path, "wb") as f:

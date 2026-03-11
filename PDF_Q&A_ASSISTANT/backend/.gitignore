@@ -5,3 +5,10 @@ __pycache__/
 all_in_one_law_folder/
 test.py
 .streamlit/secrets.toml
+# Python cache files
+*.pyc
+__pycache__/
+# Ignore all __pycache__ folders globally
+**/__pycache__/
+# Ignore all .pyc files globally
+**/*.pyc
