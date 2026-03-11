@@ -99,9 +99,48 @@ class RagPipeline:
                     raise
                 print(msg)
                 continue
+
+        # --- TXT files ---
+        for file in folder.rglob("*.txt"):
+            print(f"Processing TXT file: {file.name}")
+            try:
+                text = file.read_text(encoding="utf-8", errors="ignore").strip()
+                if not text:
+                    continue
+                pages.append({
+                    "page_content": text,
+                    "filename": file.name,
+                    "page_number": 1,
+                    "file_path": str(file),
+                })
+            except Exception as e:
+                if strict:
+                    raise
+                print(f"Error reading {file.name}: {e}")
+
+        # --- DOCX files ---
+        for file in folder.rglob("*.docx"):
+            print(f"Processing DOCX file: {file.name}")
+            try:
+                from docx import Document as DocxDocument
+                doc = DocxDocument(str(file))
+                text = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+                if not text:
+                    continue
+                pages.append({
+                    "page_content": text,
+                    "filename": file.name,
+                    "page_number": 1,
+                    "file_path": str(file),
+                })
+            except Exception as e:
+                if strict:
+                    raise
+                print(f"Error reading {file.name}: {e}")
+
         if not pages and strict:
-            raise DocumentFolderNotFoundException(f"No readable PDF pages in {folder_path}")
-        print(f"Loaded {len(pages)} pages from {len(list(folder.rglob('*.pdf')))} PDF files")
+            raise DocumentFolderNotFoundException(f"No readable pages in {folder_path}")
+        print(f"Loaded {len(pages)} pages total from {folder_path}")
         return pages
 
     def load_images(self, folder_path: str, strict: bool = True) -> List[Dict[str, Any]]:
@@ -273,8 +312,7 @@ class RagPipeline:
             )
             
             docs = []
-            highest_score = float("-inf")
-            highest_url = None
+
 
             for match in results.get('matches', []):
                 score = match.get('score', 0)
@@ -291,10 +329,8 @@ class RagPipeline:
                         }
                     )
                     docs.append(doc)
-                    if score > highest_score:
-                        highest_score = score
-                        highest_url = metadata.get('file_path', '')
+                
             print(f"Found {len(docs)} relevant chunks")
-            return docs, highest_url
+            return docs
         except Exception as e:
             raise PineconeQueryException(str(e))

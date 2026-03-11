@@ -1,17 +1,21 @@
 import os
 import fitz
 import tempfile
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from src.schemas.response import QueryRequest
 from src.utils.swagger import uploadendpoint, queryendpoint
 from src.db.upload import process_uploaded_files
 from src.services.rag_service import get_rag_response
 from src.services.summarize_service import get_summary
+from src.config.pinecone_db import index
+from src.config import settings
 from pathlib import Path
 from src.core.exceptions import LLMServiceAPIException, LLMServiceUnexpectedException
 
 
 router = APIRouter()
+
+PINECONE_NAMESPACE = settings.PINECONE_NAMESPACE or ""
 
 # --- File Upload Endpoint ---
 @router.post("/upload", **uploadendpoint)
@@ -96,3 +100,60 @@ async def summarize_document(
         return {"error": str(e)}
     except Exception as e:
         return {"error": str(e)}
+
+
+# --- Knowledge Base: List Files ---
+@router.get("/knowledge-base")
+async def list_knowledge_base():
+    """
+    List all unique filenames stored in the Pinecone knowledge base,
+    along with total vector count in the namespace.
+    """
+    try:
+        # Collect all vector IDs via paginated listing (serverless supports this)
+        all_ids = []
+        for id_batch in index.list(namespace=PINECONE_NAMESPACE):
+            all_ids.extend(id_batch)
+            if len(all_ids) >= 10_000:
+                break
+
+        total_vectors = len(all_ids)
+        if not all_ids:
+            return {"files": [], "total_vectors": 0}
+
+        # Fetch metadata in batches of 100 to extract unique filenames
+        BATCH = 100
+        filename_counts: dict[str, int] = {}
+        # Sample up to 1000 IDs for filename discovery (proportional to real count)
+        sample_ids = all_ids[:1000]
+        for i in range(0, len(sample_ids), BATCH):
+            batch_ids = sample_ids[i: i + BATCH]
+            fetch_result = index.fetch(ids=batch_ids, namespace=PINECONE_NAMESPACE)
+            for vec in fetch_result.vectors.values():
+                fname = (vec.metadata or {}).get("filename", "")
+                if fname:
+                    filename_counts[fname] = filename_counts.get(fname, 0) + 1
+
+        files = [{"filename": f, "vector_count": c} for f, c in sorted(filename_counts.items())]
+        return {"files": files, "total_vectors": total_vectors}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# --- Knowledge Base: Delete File ---
+@router.delete("/knowledge-base/{filename}")
+async def delete_from_knowledge_base(filename: str):
+    """
+    Delete all vectors associated with the given filename from Pinecone.
+    Uses Pinecone metadata filtering: filename == requested filename.
+    """
+    try:
+        index.delete(
+            filter={"filename": {"$eq": filename}},
+            namespace=PINECONE_NAMESPACE,
+        )
+        return {"success": True, "message": f"'{filename}' removed from knowledge base"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

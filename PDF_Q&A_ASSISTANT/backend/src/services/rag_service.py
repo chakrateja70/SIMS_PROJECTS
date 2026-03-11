@@ -15,7 +15,7 @@ def get_rag_response(query: str, top_k: int = 5, min_score: float = 0.8):
     """
     try:
         # 1. Retrieve relevant document chunks and highest scored vector website
-        docs, highest_url = rag_pipeline.retrieve_relevant_chunks(
+        docs= rag_pipeline.retrieve_relevant_chunks(
             query=query,
             top_k=top_k,
             min_score=min_score,
@@ -74,24 +74,13 @@ def get_rag_response(query: str, top_k: int = 5, min_score: float = 0.8):
             message="Answer retrieved successfully",
             query=query,
             answer=final_answer,
-            sources=unique_sources,
+            sources=[] if final_answer.strip() == FALLBACK_MESSAGE.strip() else unique_sources,
         )
         
         # If the answer is the fallback message, don't include a source URL.
         if final_answer.strip() == FALLBACK_MESSAGE.strip():
             return response
 
-        # Handle source URL with improved validation
-        is_valid_url = (
-            highest_url and 
-            highest_url != "NA" and 
-            isinstance(highest_url, str) and 
-            (highest_url.startswith("http://") or highest_url.startswith("https://"))
-        )
-        
-        if is_valid_url:
-            response.answer = f"{response.answer}\nSource: {highest_url}"
-        
         # Always return the response object
         return response
 
