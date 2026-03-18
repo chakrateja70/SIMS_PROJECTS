@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pytesseract
+Pillow
+groq
+psycopg2-binary
+python-dotenv
+python-multipart
+pypdfium2
