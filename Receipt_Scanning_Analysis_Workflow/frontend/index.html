@@ -162,8 +162,27 @@ body {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 60px 20px; color: var(--text3); text-align: center; gap: 12px;
 }
-.empty-state .empty-icon { font-size: 2.4rem; opacity: 0.4; }
+.empty-state .empty-icon { width: 40px; height: 40px; opacity: 0.45; color: var(--text3); }
 .empty-state p { font-size: 0.88rem; }
+
+.svg-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1em;
+  height: 1.1em;
+  color: currentColor;
+  vertical-align: middle;
+}
+.svg-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
 /* Separator line */
 .sep { border: none; border-top: 1px solid var(--line); margin: 0; }
@@ -172,20 +191,22 @@ body {
    TOAST
 ═══════════════════════════════════════════ */
 #toast {
-  position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+  position: fixed; top: 18px; left: 50%; z-index: 9999;
   background: var(--surface2);
   border: 1px solid var(--line2);
   border-radius: var(--r-sm);
-  padding: 12px 18px;
+  padding: 12px 16px;
   display: flex; align-items: center; gap: 10px;
   font-size: 0.85rem; font-weight: 500;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-  transform: translateY(80px); opacity: 0;
-  transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  transform: translate(-50%, -20px); opacity: 0;
+  transition: all 0.28s ease;
   pointer-events: none;
+  min-width: 260px;
+  max-width: min(92vw, 560px);
 }
-#toast.show { transform: translateY(0); opacity: 1; }
-.toast-icon { font-size: 1rem; }
+#toast.show { transform: translate(-50%, 0); opacity: 1; }
+.toast-icon { width: 18px; height: 18px; color: currentColor; }
 
 /* ═══════════════════════════════════════════
    HOME PAGE
@@ -286,10 +307,11 @@ body {
   border: 1px solid var(--line2);
   border-radius: var(--r-sm);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem;
+  color: var(--text2);
   transition: all 0.3s ease;
   cursor: default;
 }
+.pipe-icon .svg-icon { width: 24px; height: 24px; }
 .pipe-step:hover .pipe-icon {
   background: var(--amber-dim);
   border-color: var(--amber);
@@ -334,7 +356,7 @@ body {
   transform: translateY(-3px);
 }
 .feat-icon {
-  font-size: 1.6rem; margin-bottom: 16px;
+  width: 26px; height: 26px; margin-bottom: 16px;
   display: block;
 }
 .feat-title {
@@ -352,6 +374,41 @@ body {
 .upload-wrapper {
   max-width: 860px; margin: 0 auto;
   padding: 56px 40px;
+}
+
+.upload-mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.mode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-xs);
+  color: var(--text2);
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-btn:hover {
+  color: var(--text);
+  border-color: var(--amber);
+}
+
+.mode-btn.active {
+  color: var(--amber);
+  border-color: rgba(245,166,35,0.4);
+  background: var(--amber-dim);
 }
 
 .upload-drop-zone {
@@ -382,9 +439,10 @@ body {
   background: var(--surface3);
   border: 1px solid var(--line2);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.8rem; margin: 0 auto 20px;
+  color: var(--text2); margin: 0 auto 20px;
   transition: transform 0.3s ease;
 }
+.drop-icon .svg-icon { width: 30px; height: 30px; }
 .upload-drop-zone:hover .drop-icon { transform: scale(1.08) translateY(-4px); }
 
 .drop-title {
@@ -414,11 +472,20 @@ body {
   display: flex; align-items: center; gap: 14px;
   animation: fadeUp 0.3s ease both;
 }
-.qi-icon { font-size: 1.4rem; flex-shrink: 0; }
+.qi-icon { width: 24px; height: 24px; flex-shrink: 0; color: var(--text2); }
 .qi-info { flex: 1; min-width: 0; }
 .qi-name { font-size: 0.88rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qi-size { font-size: 0.75rem; color: var(--text3); margin-top: 2px; }
 .qi-status { flex-shrink: 0; }
+
+.mini-loader {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(242,96,96,0.25);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
 
 /* Progress bar */
 .progress-bar-wrap {
@@ -462,6 +529,19 @@ body {
   padding: 10px 14px; border-radius: var(--r-xs);
   font-size: 0.85rem; font-weight: 500;
   transition: all 0.3s ease;
+}
+.proc-step-index {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  opacity: 0.9;
 }
 .proc-step.idle { color: var(--text3); background: transparent; }
 .proc-step.running {
@@ -744,8 +824,9 @@ body {
 .search-icon-inner {
   position: absolute; left: 18px; top: 50%;
   transform: translateY(-50%);
-  color: var(--text3); font-size: 1rem; pointer-events: none;
+  color: var(--text3); pointer-events: none;
 }
+.search-icon-inner .svg-icon { width: 16px; height: 16px; }
 .search-input {
   width: 100%;
   background: var(--surface);
@@ -834,7 +915,7 @@ body {
   position: absolute; top: 16px; right: 20px;
   line-height: 1; user-select: none;
 }
-.wf-step-icon { font-size: 1.5rem; margin-bottom: 14px; }
+.wf-step-icon { width: 26px; height: 26px; margin-bottom: 14px; color: var(--text2); }
 .wf-step-title {
   font-family: var(--font-display);
   font-size: 1rem; font-weight: 600; color: var(--text);
@@ -858,7 +939,7 @@ body {
   transition: all 0.2s;
 }
 .tech-chip:hover { border-color: var(--line2); background: var(--surface2); }
-.tech-emoji { font-size: 1.1rem; }
+.tech-emoji { width: 18px; height: 18px; color: var(--text2); }
 .tech-info .tech-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
 .tech-info .tech-role { font-size: 0.72rem; color: var(--text3); }
 
@@ -918,7 +999,7 @@ footer {
 <body>
 
 <!-- TOAST -->
-<div id="toast"><span class="toast-icon" id="toastIcon">✓</span><span id="toastMsg">—</span></div>
+<div id="toast"><span class="toast-icon" id="toastIcon"><span class="svg-icon" data-icon="check"></span></span><span id="toastMsg">—</span></div>
 
 <!-- ─── NAV ─── -->
 <nav id="nav">
@@ -932,7 +1013,7 @@ footer {
     <button class="nav-link"        id="nl-dashboard"  onclick="nav('dashboard')">Dashboard</button>
     <button class="nav-link"        id="nl-search"     onclick="nav('search')">Search</button>
     <button class="nav-link"        id="nl-about"      onclick="nav('about')">About</button>
-    <button class="nav-upload-btn"  onclick="nav('upload')">+ Upload</button>
+    <button class="nav-upload-btn"  onclick="nav('upload')"><span class="svg-icon" data-icon="upload"></span> Upload</button>
   </div>
 </nav>
 
@@ -958,7 +1039,7 @@ footer {
     </p>
     <div class="hero-actions">
       <button class="btn-primary" onclick="nav('upload')">
-        <span>↑</span> Upload Receipt
+        <span class="svg-icon" data-icon="upload"></span> Upload Receipt
       </button>
       <button class="btn-ghost" onclick="nav('dashboard')">
         View Dashboard
@@ -969,27 +1050,27 @@ footer {
     <div class="pipeline">
       <div class="pipe-step">
         <div class="pipe-num">1</div>
-        <div class="pipe-icon">📄</div>
+        <div class="pipe-icon"><span class="svg-icon" data-icon="file"></span></div>
         <div class="pipe-label">Ingest<br>Image / PDF</div>
       </div>
       <div class="pipe-step">
         <div class="pipe-num">2</div>
-        <div class="pipe-icon">👁️</div>
+        <div class="pipe-icon"><span class="svg-icon" data-icon="scan"></span></div>
         <div class="pipe-label">OCR<br>Extraction</div>
       </div>
       <div class="pipe-step">
         <div class="pipe-num">3</div>
-        <div class="pipe-icon">🤖</div>
+        <div class="pipe-icon"><span class="svg-icon" data-icon="bot"></span></div>
         <div class="pipe-label">AI<br>Structuring</div>
       </div>
       <div class="pipe-step">
         <div class="pipe-num">4</div>
-        <div class="pipe-icon">🗄️</div>
+        <div class="pipe-icon"><span class="svg-icon" data-icon="database"></span></div>
         <div class="pipe-label">Store &<br>Index</div>
       </div>
       <div class="pipe-step">
         <div class="pipe-num">5</div>
-        <div class="pipe-icon">📊</div>
+        <div class="pipe-icon"><span class="svg-icon" data-icon="chart"></span></div>
         <div class="pipe-label">Analyse &<br>Insight</div>
       </div>
     </div>
@@ -1001,48 +1082,38 @@ footer {
     <div class="section-heading">What the workflow delivers</div>
     <div class="features-grid">
       <div class="feat-card">
-        <span class="feat-icon">⚡</span>
+        <span class="feat-icon svg-icon" data-icon="bolt"></span>
         <div class="feat-title">Instant OCR</div>
         <div class="feat-desc">Deep-learning OCR extracts every character, bounding box, and confidence score from any quality image in under 2 seconds.</div>
       </div>
       <div class="feat-card">
-        <span class="feat-icon">🤖</span>
+        <span class="feat-icon svg-icon" data-icon="bot"></span>
         <div class="feat-title">AI Structuring</div>
-        <div class="feat-desc">Large language model parses raw OCR output into clean JSON — store name, date, line items, subtotal, tax, and grand total.</div>
+        <div class="feat-desc">Groq LLM parses OCR output into clean JSON fields including customer, mobile, dates, payment mode, item rows, and total amount.</div>
       </div>
       <div class="feat-card">
-        <span class="feat-icon">📊</span>
+        <span class="feat-icon svg-icon" data-icon="chart"></span>
         <div class="feat-title">Live Analytics</div>
         <div class="feat-desc">Your dashboard computes spending trends, category breakdowns, and month-over-month comparisons dynamically from your uploaded data.</div>
       </div>
       <div class="feat-card">
-        <span class="feat-icon">🔍</span>
+        <span class="feat-icon svg-icon" data-icon="search"></span>
         <div class="feat-title">Smart Search</div>
         <div class="feat-desc">Full-text search across all receipts by store, item, date, mobile, or amount. Filter by category instantly.</div>
       </div>
       <div class="feat-card">
-        <span class="feat-icon">📱</span>
+        <span class="feat-icon svg-icon" data-icon="mobile"></span>
         <div class="feat-title">Mobile Lookup</div>
         <div class="feat-desc">Associate receipts with a mobile number for per-customer or per-user transaction history and spending summaries.</div>
       </div>
       <div class="feat-card">
-        <span class="feat-icon">🔒</span>
+        <span class="feat-icon svg-icon" data-icon="lock"></span>
         <div class="feat-title">Secure Storage</div>
-        <div class="feat-desc">All receipt data is encrypted at rest and indexed for sub-millisecond retrieval via MongoDB Atlas with full audit trail.</div>
+        <div class="feat-desc">Receipts are persisted in PostgreSQL (Neon) with JSONB indexing for fast mobile-number lookup and reliable retrieval.</div>
       </div>
     </div>
   </div>
 
-  <footer>
-    <div class="footer-brand"><div class="logo-mark" style="width:22px;height:22px;font-size:0.6rem">R</div>ReceiptScan</div>
-    <div class="footer-links">
-      <span onclick="nav('upload')">Upload</span>
-      <span onclick="nav('dashboard')">Dashboard</span>
-      <span onclick="nav('search')">Search</span>
-      <span onclick="nav('about')">About</span>
-    </div>
-    <div class="footer-copy">Receipt_Scanning_Analysis_Workflow</div>
-  </footer>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -1058,10 +1129,19 @@ footer {
       </p>
     </div>
 
+    <div class="upload-mode-switch">
+      <button id="modeUploadBtn" class="mode-btn active" onclick="setUploadMode('upload')">
+        <span class="svg-icon" data-icon="upload"></span> Upload File
+      </button>
+      <button id="modeManualBtn" class="mode-btn" onclick="setUploadMode('manual')">
+        <span class="svg-icon" data-icon="edit"></span> Enter Manually
+      </button>
+    </div>
+
     <!-- Drop zone -->
-    <div class="upload-drop-zone" id="dropZone" onclick="document.getElementById('realFileInput').click()">
+    <div class="upload-drop-zone upload-only" id="dropZone" onclick="document.getElementById('realFileInput').click()">
       <input type="file" id="realFileInput" accept="image/*,.pdf" multiple onchange="onFilePick(this.files)">
-      <div class="drop-icon" id="dropIcon">📄</div>
+      <div class="drop-icon" id="dropIcon"><span class="svg-icon" data-icon="upload"></span></div>
       <div class="drop-title">Drop receipts here</div>
       <p class="drop-hint">or click to choose files from your device</p>
       <div class="drop-formats">
@@ -1072,17 +1152,7 @@ footer {
     </div>
 
     <!-- File queue -->
-    <div class="upload-queue" id="uploadQueue"></div>
-
-    <!-- OR manual entry toggle -->
-    <div style="display:flex;align-items:center;gap:14px;margin:20px 0">
-      <div style="flex:1;height:1px;background:var(--line)"></div>
-      <span style="font-size:0.78rem;color:var(--text3)">or</span>
-      <div style="flex:1;height:1px;background:var(--line)"></div>
-    </div>
-    <button class="btn-ghost" style="width:100%;justify-content:center" onclick="toggleManualForm()">
-      ✏️ Enter Receipt Details Manually
-    </button>
+    <div class="upload-queue upload-only" id="uploadQueue"></div>
 
     <!-- Manual entry form -->
     <div class="manual-form" id="manualForm">
@@ -1145,7 +1215,7 @@ footer {
     </div>
 
     <!-- Processing panel -->
-    <div class="process-panel" id="processPanel">
+    <div class="process-panel upload-only" id="processPanel">
       <div class="process-header">
         <div class="spin"></div>
         <span style="font-size:0.9rem;font-weight:600" id="processTitle">Processing receipt…</span>
@@ -1154,7 +1224,7 @@ footer {
     </div>
 
     <!-- Result panel -->
-    <div class="result-panel" id="resultPanel">
+    <div class="result-panel upload-only" id="resultPanel">
       <div class="result-top">
         <div>
           <div class="result-store-name" id="rp-store">—</div>
@@ -1197,7 +1267,7 @@ footer {
         <h1 class="section-heading" style="font-size:2rem">Dashboard</h1>
         <div class="dash-meta" id="dashMeta">No receipts yet — upload one to get started.</div>
       </div>
-      <button class="btn-primary" onclick="nav('upload')"><span>↑</span> Add Receipt</button>
+      <button class="btn-primary" onclick="nav('upload')"><span class="svg-icon" data-icon="upload"></span> Add Receipt</button>
     </div>
 
     <!-- Metrics -->
@@ -1229,13 +1299,13 @@ footer {
       <div class="chart-card">
         <div class="chart-title">Spending by Month</div>
         <div class="bar-chart-area" id="barChartArea">
-          <div class="empty-state" style="width:100%"><span class="empty-icon">📊</span><p>Upload receipts to see spending trends</p></div>
+          <div class="empty-state" style="width:100%"><span class="empty-icon svg-icon" data-icon="chart"></span><p>Upload receipts to see spending trends</p></div>
         </div>
       </div>
       <div class="chart-card">
         <div class="chart-title">By Category</div>
         <div id="donutArea">
-          <div class="empty-state"><span class="empty-icon">🍩</span><p>No category data yet</p></div>
+          <div class="empty-state"><span class="empty-icon svg-icon" data-icon="donut"></span><p>No category data yet</p></div>
         </div>
       </div>
     </div>
@@ -1277,7 +1347,7 @@ footer {
     </div>
 
     <div class="search-bar-wrap">
-      <span class="search-icon-inner">🔍</span>
+      <span class="search-icon-inner"><span class="svg-icon" data-icon="search"></span></span>
       <input class="search-input" id="searchBox"
         placeholder="Search by store name, item, mobile number, amount…"
         oninput="onSearch()">
@@ -1294,7 +1364,7 @@ footer {
 
     <div class="results-grid" id="resultsGrid">
       <div class="empty-state" style="grid-column:span 2">
-        <span class="empty-icon">📭</span>
+        <span class="empty-icon svg-icon" data-icon="inbox"></span>
         <p>Upload some receipts first</p>
       </div>
     </div>
@@ -1320,32 +1390,32 @@ footer {
     <div class="section-eyebrow" style="margin-bottom:16px">Processing Pipeline</div>
     <div class="workflow-grid">
       <div class="wf-card"><div class="wf-num">01</div>
-        <div class="wf-step-icon">📥</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="inbox"></span></div>
         <div class="wf-step-title">Ingestion</div>
-        <div class="wf-step-desc">Accept multipart file upload (JPG, PNG, PDF, HEIC). Auto-orient, denoise, and deskew with OpenCV before passing to the OCR engine.</div>
+        <div class="wf-step-desc">Accept multipart uploads (JPG, JPEG, PNG, PDF) and normalize image/PDF pages for OCR extraction.</div>
       </div>
       <div class="wf-card"><div class="wf-num">02</div>
-        <div class="wf-step-icon">👁️</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="scan"></span></div>
         <div class="wf-step-title">OCR Extraction</div>
-        <div class="wf-step-desc">Tesseract (or cloud Vision API) extracts all text blocks with positional metadata and per-word confidence scores.</div>
+        <div class="wf-step-desc">Tesseract OCR extracts full receipt text after preprocessing with PIL, contrast enhancement, and sharpening.</div>
       </div>
       <div class="wf-card"><div class="wf-num">03</div>
-        <div class="wf-step-icon">🤖</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="bot"></span></div>
         <div class="wf-step-title">AI Structuring</div>
-        <div class="wf-step-desc">LLM prompt converts raw OCR text into a validated JSON schema: store, date, mobile, items[], subtotal, tax, total.</div>
+        <div class="wf-step-desc">Groq-hosted Llama parses OCR text into structured receipt JSON with customer, mobile, dates, payment, items, and total.</div>
       </div>
       <div class="wf-card"><div class="wf-num">04</div>
-        <div class="wf-step-icon">🗄️</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="database"></span></div>
         <div class="wf-step-title">Persistence</div>
-        <div class="wf-step-desc">Structured document stored in MongoDB with full-text index on store name and item descriptions for O(1) lookup.</div>
+        <div class="wf-step-desc">Structured payload is stored in PostgreSQL JSONB with an index on extracted mobile for efficient per-user history queries.</div>
       </div>
       <div class="wf-card"><div class="wf-num">05</div>
-        <div class="wf-step-icon">📊</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="chart"></span></div>
         <div class="wf-step-title">Analytics</div>
         <div class="wf-step-desc">Aggregation pipeline computes monthly totals, category breakdowns, per-mobile summaries, and anomaly flags in real time.</div>
       </div>
       <div class="wf-card"><div class="wf-num">06</div>
-        <div class="wf-step-icon">🌐</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="globe"></span></div>
         <div class="wf-step-title">API Surface</div>
         <div class="wf-step-desc">FastAPI exposes REST endpoints: POST /upload, GET /receipts, GET /receipts/{mobile}, GET /insights — all OpenAPI documented.</div>
       </div>
@@ -1355,13 +1425,13 @@ footer {
     <div class="tech-section">
       <div class="tech-section-title">Technology Stack</div>
       <div class="tech-row">
-        <div class="tech-chip"><span class="tech-emoji">🐍</span><div class="tech-info"><div class="tech-name">FastAPI</div><div class="tech-role">REST Backend</div></div></div>
-        <div class="tech-chip"><span class="tech-emoji">🤖</span><div class="tech-info"><div class="tech-name">Claude / GPT</div><div class="tech-role">LLM Structuring</div></div></div>
-        <div class="tech-chip"><span class="tech-emoji">👁️</span><div class="tech-info"><div class="tech-name">Tesseract OCR</div><div class="tech-role">Text Extraction</div></div></div>
-        <div class="tech-chip"><span class="tech-emoji">🗄️</span><div class="tech-info"><div class="tech-name">MongoDB</div><div class="tech-role">Document Store</div></div></div>
-        <div class="tech-chip"><span class="tech-emoji">🌐</span><div class="tech-info"><div class="tech-name">Vanilla JS SPA</div><div class="tech-role">Frontend</div></div></div>
-        <div class="tech-chip"><span class="tech-emoji">📦</span><div class="tech-info"><div class="tech-name">Docker</div><div class="tech-role">Container Deploy</div></div></div>
-        <div class="tech-chip"><span class="tech-emoji">🔍</span><div class="tech-info"><div class="tech-name">OpenCV</div><div class="tech-role">Image Pre-process</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="code"></span><div class="tech-info"><div class="tech-name">FastAPI</div><div class="tech-role">REST Backend</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="bot"></span><div class="tech-info"><div class="tech-name">Groq LLM</div><div class="tech-role">LLM Structuring</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="scan"></span><div class="tech-info"><div class="tech-name">Tesseract OCR</div><div class="tech-role">Text Extraction</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="database"></span><div class="tech-info"><div class="tech-name">PostgreSQL</div><div class="tech-role">Neon Storage</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="globe"></span><div class="tech-info"><div class="tech-name">Vanilla JS SPA</div><div class="tech-role">Frontend</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="package"></span><div class="tech-info"><div class="tech-name">Python Services</div><div class="tech-role">Workflow Runtime</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="spark"></span><div class="tech-info"><div class="tech-name">PDFium + PIL</div><div class="tech-role">Image Pre-process</div></div></div>
       </div>
     </div>
 
@@ -1370,22 +1440,20 @@ footer {
       <div class="tech-section-title">Receipt JSON Schema</div>
       <div class="code-block">
 <span class="code-key">"receipt"</span>: {<br>
-&nbsp;&nbsp;<span class="code-key">"id"</span>:       <span class="code-type">string</span>,<br>
-&nbsp;&nbsp;<span class="code-key">"store"</span>:    <span class="code-type">string</span>,<br>
-&nbsp;&nbsp;<span class="code-key">"date"</span>:     <span class="code-type">ISO 8601 date</span>,<br>
-&nbsp;&nbsp;<span class="code-key">"mobile"</span>:   <span class="code-type">string | null</span>,<br>
-&nbsp;&nbsp;<span class="code-key">"payment"</span>:  <span class="code-str">"UPI" | "Cash" | "Card" | "Net Banking"</span>,<br>
-&nbsp;&nbsp;<span class="code-key">"category"</span>: <span class="code-str">"Groceries" | "Dining" | "Shopping" | …</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"id"</span>:              <span class="code-type">number</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"customer_name"</span>:   <span class="code-type">string | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"mobile"</span>:          <span class="code-type">string | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"order_date"</span>:      <span class="code-type">DD/MM/YYYY | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"delivery_date"</span>:   <span class="code-type">DD/MM/YYYY | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"payment_mode"</span>:    <span class="code-type">string | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"total_items"</span>:      <span class="code-type">number | null</span>,<br>
 &nbsp;&nbsp;<span class="code-key">"items"</span>: [{<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"name"</span>:  <span class="code-type">string</span>,<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"qty"</span>:   <span class="code-type">number</span>,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"price"</span>: <span class="code-type">number</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"rate"</span>:  <span class="code-type">number</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"amount"</span>:<span class="code-type">number</span><br>
 &nbsp;&nbsp;}],<br>
-&nbsp;&nbsp;<span class="code-key">"subtotal"</span>: <span class="code-type">number</span>,<br>
-&nbsp;&nbsp;<span class="code-key">"tax"</span>:      <span class="code-type">number</span>,<br>
-&nbsp;&nbsp;<span class="code-key">"total"</span>:    <span class="code-type">number</span>,<br>
-&nbsp;&nbsp;<span class="code-key">"notes"</span>:    <span class="code-type">string | null</span>,<br>
-&nbsp;&nbsp;<span class="code-key">"createdAt"</span>: <span class="code-type">ISO 8601 datetime</span><br>
+&nbsp;&nbsp;<span class="code-key">"total_amount"</span>:    <span class="code-type">number | null</span><br>
 }
       </div>
     </div>
@@ -1396,63 +1464,167 @@ footer {
      JS
 ═══════════════════════════════════════════ -->
 <script>
-/* ─── DATA STORE ─── */
-// All receipts live in localStorage under key "rsw_receipts"
-const STORE_KEY = 'rsw_receipts';
+const API_BASE = localStorage.getItem('rsw_api_base') || 'http://127.0.0.1:8000';
+const DONUT_COLORS = ['#f5a623','#3ecf8e','#5b8def','#e07070','#c09eff','#ff9f5a','#61dafb','#9998a3'];
 
-function loadReceipts() {
-  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); }
-  catch { return []; }
-}
-function saveReceipts(arr) {
-  localStorage.setItem(STORE_KEY, JSON.stringify(arr));
-}
-function addReceipt(r) {
-  const arr = loadReceipts();
-  arr.unshift(r);
-  saveReceipts(arr);
-}
-function deleteReceipt(id) {
-  saveReceipts(loadReceipts().filter(r => r.id !== id));
+let receiptsCache = [];
+let pendingReceipt = null;
+let manualItemRows = [];
+let activeFilter = 'all';
+
+function iconSvg(name) {
+  const map = {
+    check: '<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>',
+    x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6l-12 12"/></svg>',
+    upload: '<svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/></svg>',
+    file: '<svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>',
+    scan: '<svg viewBox="0 0 24 24"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M6 12h12"/></svg>',
+    bot: '<svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 13h.01M15 13h.01"/></svg>',
+    database: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v10c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/></svg>',
+    chart: '<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V6M16 20v-8M22 20H2"/></svg>',
+    bolt: '<svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>',
+    search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+    mobile: '<svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
+    lock: '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3"/></svg>',
+    edit: '<svg viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M13 6l4 4"/></svg>',
+    donut: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4a8 8 0 0 1 8 8"/></svg>',
+    inbox: '<svg viewBox="0 0 24 24"><path d="M4 4h16l-2 12H6z"/><path d="M8 12h8"/></svg>',
+    globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>',
+    code: '<svg viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/></svg>',
+    package: '<svg viewBox="0 0 24 24"><path d="M12 2l8 4-8 4-8-4z"/><path d="M4 6v8l8 4 8-4V6"/></svg>',
+    spark: '<svg viewBox="0 0 24 24"><path d="M12 3l2.2 4.8L19 10l-4.8 2.2L12 17l-2.2-4.8L5 10l4.8-2.2z"/></svg>',
+    image: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 14l3-3 5 5M8 8h.01"/></svg>',
+    pdf: '<svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 16h8"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',
+    box: '<svg viewBox="0 0 24 24"><path d="M12 2l8 4-8 4-8-4z"/><path d="M4 6v12l8 4 8-4V6"/></svg>',
+    trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M7 7l1 13h8l1-13"/><path d="M10 11v6M14 11v6"/></svg>'
+  };
+  return map[name] || map.file;
 }
 
-/* ─── UTILS ─── */
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-function fmt(n) { return '₹' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function svgIcon(name, cls = '') {
+  return `<span class="svg-icon ${cls}">${iconSvg(name)}</span>`;
+}
+
+function hydrateIconPlaceholders(root = document) {
+  root.querySelectorAll('.svg-icon[data-icon]').forEach(el => {
+    if (el.dataset.hydrated) return;
+    el.innerHTML = iconSvg(el.dataset.icon || 'file');
+    el.dataset.hydrated = '1';
+  });
+}
+
+function toNum(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function fmt(n) {
+  return '₹' + toNum(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function fmtDate(d) {
   if (!d) return '—';
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
+    const [day, month, year] = d.split('/').map(Number);
+    const dt = new Date(year, month - 1, day);
+    return isNaN(dt) ? d : dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
   const dt = new Date(d);
-  return isNaN(dt) ? d : dt.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+  return isNaN(dt) ? d : dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
+
 function fileSize(bytes) {
   if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
-  return (bytes/1048576).toFixed(1) + ' MB';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
 }
+
+function fileExt(name) {
+  return (name.split('.').pop() || '').toUpperCase();
+}
+
 function catColor(cat) {
   const map = {
-    'Groceries':'#f5a623','Dining':'#3ecf8e','Shopping':'#5b8def',
-    'Transport':'#e07070','Medical':'#c09eff','Utilities':'#61dafb',
-    'Entertainment':'#ff9f5a','Other':'#9998a3'
+    Groceries: '#f5a623', Dining: '#3ecf8e', Shopping: '#5b8def',
+    Transport: '#e07070', Medical: '#c09eff', Utilities: '#61dafb',
+    Entertainment: '#ff9f5a', Other: '#9998a3'
   };
   return map[cat] || '#9998a3';
 }
-function fileExt(name) {
-  return name.split('.').pop().toUpperCase();
+
+function inferCategory(items = []) {
+  const text = items.map(it => String(it.name || '')).join(' ').toLowerCase();
+  if (!text) return 'Other';
+  if (/(rice|milk|oil|atta|dal|sugar|soap|shampoo|vegetable|fruit|masala|grocery)/.test(text)) return 'Groceries';
+  if (/(pizza|meal|restaurant|cafe|snack|juice|tea|coffee)/.test(text)) return 'Dining';
+  if (/(medicine|tablet|syrup|pharma)/.test(text)) return 'Medical';
+  if (/(bus|metro|fuel|petrol|diesel|uber|ola)/.test(text)) return 'Transport';
+  return 'Other';
 }
 
-/* ─── TOAST ─── */
 function toast(msg, ok = true) {
   const t = document.getElementById('toast');
+  const iconEl = document.getElementById('toastIcon');
   document.getElementById('toastMsg').textContent = msg;
-  document.getElementById('toastIcon').textContent = ok ? '✓' : '✕';
+  iconEl.innerHTML = ok ? iconSvg('check') : iconSvg('x');
+  t.style.color = ok ? 'var(--green)' : 'var(--red)';
   t.style.borderColor = ok ? 'rgba(62,207,142,0.3)' : 'rgba(242,96,96,0.3)';
   t.classList.add('show');
   clearTimeout(t._t);
   t._t = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-/* ─── NAVIGATION ─── */
+async function apiFetch(path, options = {}) {
+  const res = await fetch(`${API_BASE}${path}`, options);
+  const text = await res.text();
+  let body = null;
+  try { body = text ? JSON.parse(text) : null; }
+  catch { body = null; }
+  if (!res.ok) {
+    const detail = body && body.detail ? body.detail : `Request failed (${res.status})`;
+    throw new Error(detail);
+  }
+  return body;
+}
+
+function normalizeReceipt(row) {
+  const data = row && row.data ? row.data : {};
+  const items = Array.isArray(data.items)
+    ? data.items.map(it => ({
+        name: it.name || 'Item',
+        qty: toNum(it.qty) || 1,
+        price: toNum(it.rate),
+        amount: toNum(it.amount) || (toNum(it.qty) || 1) * toNum(it.rate)
+      }))
+    : [];
+
+  const subtotal = items.reduce((sum, it) => sum + it.amount, 0);
+  const total = toNum(data.total_amount) || subtotal;
+
+  return {
+    id: String(row.id || Date.now()),
+    store: data.customer_name || 'DMart Receipt',
+    date: data.order_date || data.delivery_date || (row.uploaded_at || '').slice(0, 10),
+    mobile: data.mobile || '',
+    payment: data.payment_mode || '',
+    category: inferCategory(items),
+    items,
+    subtotal,
+    tax: Math.max(0, total - subtotal),
+    total,
+    notes: '',
+    createdAt: row.uploaded_at || new Date().toISOString()
+  };
+}
+
+async function loadReceipts(force = false) {
+  if (!force && receiptsCache.length) return receiptsCache;
+  const rows = await apiFetch('/receipts');
+  receiptsCache = Array.isArray(rows) ? rows.map(normalizeReceipt) : [];
+  return receiptsCache;
+}
+
 function nav(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -1461,30 +1633,31 @@ function nav(page) {
   if (nl) nl.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (page === 'dashboard') renderDashboard();
-  if (page === 'search')    renderSearch();
+  if (page === 'search') renderSearch();
 }
 
-/* ─── DRAG & DROP ─── */
 const dropZone = document.getElementById('dropZone');
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
 dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.classList.remove('over');
+  e.preventDefault();
+  dropZone.classList.remove('over');
   onFilePick(e.dataTransfer.files);
 });
 
-function onFilePick(files) {
+async function onFilePick(files) {
   if (!files || !files.length) return;
-  const file = files[0]; // process first file
+  setUploadMode('upload');
+  const file = files[0];
   showFileQueue(file);
-  simulateProcessing(file);
+  await uploadAndProcess(file);
 }
 
 function showFileQueue(file) {
   const q = document.getElementById('uploadQueue');
   q.innerHTML = `
     <div class="queue-item">
-      <div class="qi-icon">${fileExt(file.name) === 'PDF' ? '📑' : '🖼️'}</div>
+      <div class="qi-icon">${svgIcon(fileExt(file.name) === 'PDF' ? 'pdf' : 'image')}</div>
       <div class="qi-info">
         <div class="qi-name">${file.name}</div>
         <div class="qi-size">${fileSize(file.size)} · ${fileExt(file.name)}</div>
@@ -1494,86 +1667,86 @@ function showFileQueue(file) {
     </div>`;
 }
 
-function simulateProcessing(file) {
-  const steps = [
-    "uploading file",
-    "fetching details",
-  ];
-
-  const panel = document.getElementById('processPanel');
-  const stepsEl = document.getElementById('processSteps');
-  panel.classList.add('show');
-  document.getElementById('processTitle').textContent = `Processing "${file.name}"…`;
-
-  stepsEl.innerHTML = steps.map((s,i) => `
-    <div class="proc-step idle" id="ps-${i}">
-      <div class="proc-step-dot"></div>${s}
-    </div>`).join('');
-
-  let i = 0;
-  const bar = document.getElementById('qProgress');
-
-  const interval = setInterval(() => {
-    if (i > 0) document.getElementById(`ps-${i-1}`).className = 'proc-step done';
-    if (i < steps.length) {
-      document.getElementById(`ps-${i}`).className = 'proc-step running';
-      if (bar) bar.style.width = ((i+1)/steps.length * 80) + '%';
-      i++;
-    } else {
-      clearInterval(interval);
-      if (bar) bar.style.width = '100%';
-      document.querySelectorAll('[id^="ps-"]').forEach(el => el.className = 'proc-step done');
-
-      // Update queue chip
-      const qi = document.querySelector('.qi-status');
-      if (qi) qi.innerHTML = '<span class="chip chip-green">✓ Done</span>';
-
-      setTimeout(() => {
-        panel.classList.remove('show');
-        showExtractedResult(file);
-      }, 600);
-    }
-  }, 650);
+function setProcessStep(index, state) {
+  const el = document.getElementById(`ps-${index}`);
+  if (el) el.className = `proc-step ${state}`;
 }
 
-/* After "processing" — show blank result for user to fill / confirm */
-let pendingReceipt = null;
+async function uploadAndProcess(file) {
+  const panel = document.getElementById('processPanel');
+  const stepsEl = document.getElementById('processSteps');
+  const bar = document.getElementById('qProgress');
+  const qi = document.querySelector('.qi-status');
 
-function showExtractedResult(file) {
-  // Build a skeleton result — since we have no real backend here,
-  // the user fills in the details before saving.
-  pendingReceipt = {
-    id: uid(),
-    store: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
-    date: new Date().toISOString().split('T')[0],
-    mobile: '',
-    payment: '',
-    category: '',
-    items: [],
-    subtotal: 0,
-    tax: 0,
-    total: 0,
-    notes: '',
-    fileName: file.name,
-    createdAt: new Date().toISOString()
-  };
+  panel.classList.add('show');
+  document.getElementById('processTitle').textContent = `Processing ${file.name}`;
 
-  populateResultPanel(pendingReceipt);
-  document.getElementById('resultPanel').classList.add('show');
+  const steps = [
+    'Uploading receipt to secure server',
+    'Extracting text with OCR engine',
+    'AI is analysing receipt context',
+    'Saving structured data to database'
+  ];
+  stepsEl.innerHTML = steps.map((s, i) => `
+    <div class="proc-step idle" id="ps-${i}">
+      <div class="proc-step-dot"></div><span class="proc-step-index">${i + 1}</span>${s}
+    </div>`).join('');
 
-  // Show a notice
-  toast('File read — please review & confirm the extracted fields', true);
+  try {
+    setProcessStep(0, 'running');
+    if (bar) bar.style.width = '18%';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setProcessStep(1, 'running');
+    if (bar) bar.style.width = '42%';
+    const result = await apiFetch('/upload', { method: 'POST', body: formData });
+
+    setProcessStep(0, 'done');
+    setProcessStep(1, 'done');
+    setProcessStep(2, 'running');
+    if (bar) bar.style.width = '68%';
+
+    const normalized = normalizeReceipt({
+      id: result.id,
+      data: result.data,
+      uploaded_at: new Date().toISOString()
+    });
+    normalized.fileName = file.name;
+    pendingReceipt = normalized;
+
+    setProcessStep(2, 'done');
+    setProcessStep(3, 'running');
+    if (bar) bar.style.width = '86%';
+
+    setProcessStep(3, 'done');
+    if (bar) bar.style.width = '100%';
+    if (qi) qi.innerHTML = `<span class="chip chip-green">${svgIcon('check')} Done</span>`;
+
+    await loadReceipts(true);
+    setTimeout(() => {
+      panel.classList.remove('show');
+      populateResultPanel(normalized);
+      document.getElementById('resultPanel').classList.add('show');
+      toast('Receipt uploaded and saved to backend');
+    }, 300);
+  } catch (err) {
+    if (qi) qi.innerHTML = `<span class="chip chip-red">${svgIcon('x')} Failed</span>`;
+    panel.classList.remove('show');
+    toast(err.message || 'Upload failed', false);
+  }
 }
 
 function populateResultPanel(r) {
-  document.getElementById('rp-store').textContent  = r.store   || '—';
-  document.getElementById('rp-total').textContent  = fmt(r.total);
-  document.getElementById('rp-date').textContent   = fmtDate(r.date);
-  document.getElementById('rp-mobile').textContent = r.mobile  || '—';
-  document.getElementById('rp-pay').textContent    = r.payment || '—';
-  document.getElementById('rp-cat').textContent    = r.category|| '—';
-  document.getElementById('rp-tax').textContent    = fmt(r.tax);
-  document.getElementById('rp-notes').textContent  = r.notes   || '—';
+  document.getElementById('rp-store').textContent = r.store || '—';
+  document.getElementById('rp-total').textContent = fmt(r.total);
+  document.getElementById('rp-date').textContent = fmtDate(r.date);
+  document.getElementById('rp-mobile').textContent = r.mobile || '—';
+  document.getElementById('rp-pay').textContent = r.payment || '—';
+  document.getElementById('rp-cat').textContent = r.category || '—';
+  document.getElementById('rp-tax').textContent = fmt(r.tax);
+  document.getElementById('rp-notes').textContent = r.notes || '—';
 
   const chips = document.getElementById('rp-chips');
   chips.innerHTML = '';
@@ -1582,44 +1755,61 @@ function populateResultPanel(r) {
 
   const itemsEl = document.getElementById('rp-items');
   if (!r.items || !r.items.length) {
-    itemsEl.innerHTML = '<p style="font-size:0.82rem;color:var(--text3);padding:8px 0">No line items extracted. You can add them manually after saving.</p>';
-  } else {
-    itemsEl.innerHTML = r.items.map((it, idx) => `
-      <div class="line-item" style="animation-delay:${idx*0.05}s">
-        <span class="li-name">${it.name}</span>
-        <span class="li-qty">×${it.qty||1}</span>
-        <span class="li-price">${fmt(it.price)}</span>
-      </div>`).join('');
+    itemsEl.innerHTML = '<p style="font-size:0.82rem;color:var(--text3);padding:8px 0">No line items were extracted from this receipt.</p>';
+    return;
   }
+  itemsEl.innerHTML = r.items.map((it, idx) => `
+    <div class="line-item" style="animation-delay:${idx * 0.05}s">
+      <span class="li-name">${it.name}</span>
+      <span class="li-qty">x${it.qty || 1}</span>
+      <span class="li-price">${fmt(it.amount || (it.qty || 1) * (it.price || 0))}</span>
+    </div>`).join('');
 }
 
 function confirmSave() {
   if (!pendingReceipt) return;
-  addReceipt(pendingReceipt);
-  toast(`Receipt saved — "${pendingReceipt.store}"`);
-  resetUploadPage();
+  toast('Already saved to backend. Opening dashboard.');
+  nav('dashboard');
 }
 
 function resetUploadPage() {
-  document.getElementById('uploadQueue').innerHTML   = '';
+  document.getElementById('uploadQueue').innerHTML = '';
   document.getElementById('processPanel').classList.remove('show');
   document.getElementById('resultPanel').classList.remove('show');
-  document.getElementById('realFileInput').value     = '';
+  document.getElementById('realFileInput').value = '';
   pendingReceipt = null;
+  setUploadMode('upload');
 }
 
-/* ─── MANUAL FORM ─── */
-let manualItemRows = [];
-
 function toggleManualForm() {
-  const form = document.getElementById('manualForm');
-  const showing = form.classList.toggle('show');
-  if (showing && !manualItemRows.length) addItemRow();
+  setUploadMode('manual');
+}
+
+function setUploadMode(mode) {
+  const uploadOnly = document.querySelectorAll('.upload-only');
+  const manualForm = document.getElementById('manualForm');
+  const uploadBtn = document.getElementById('modeUploadBtn');
+  const manualBtn = document.getElementById('modeManualBtn');
+  const manual = mode === 'manual';
+
+  uploadOnly.forEach(el => {
+    el.style.display = manual ? 'none' : '';
+  });
+
+  if (manual) {
+    manualForm.classList.add('show');
+    if (!manualItemRows.length) addItemRow();
+  } else {
+    manualForm.classList.remove('show');
+  }
+
+  uploadBtn?.classList.toggle('active', !manual);
+  manualBtn?.classList.toggle('active', manual);
   document.getElementById('mf-date').value = new Date().toISOString().split('T')[0];
 }
 
 function addItemRow() {
-  const id = uid();
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
   manualItemRows.push(id);
   const list = document.getElementById('itemsList');
   const row = document.createElement('div');
@@ -1627,9 +1817,9 @@ function addItemRow() {
   row.id = 'ir-' + id;
   row.innerHTML = `
     <input class="form-input" placeholder="Item name" id="in-${id}" oninput="updateItemsTotal()">
-    <input class="form-input qty"   placeholder="Qty"   id="iq-${id}" type="number" min="1" value="1" oninput="updateItemsTotal()">
+    <input class="form-input qty" placeholder="Qty" id="iq-${id}" type="number" min="1" value="1" oninput="updateItemsTotal()">
     <input class="form-input price" placeholder="Price" id="ip-${id}" type="number" min="0" step="0.01" oninput="updateItemsTotal()">
-    <button class="remove-item-btn" onclick="removeItemRow('${id}')">✕</button>`;
+    <button class="remove-item-btn" onclick="removeItemRow('${id}')">${svgIcon('x')}</button>`;
   list.appendChild(row);
 }
 
@@ -1644,51 +1834,21 @@ function updateItemsTotal() {
   let total = 0;
   manualItemRows.forEach(id => {
     const price = parseFloat(document.getElementById('ip-' + id)?.value || 0);
-    const qty   = parseFloat(document.getElementById('iq-' + id)?.value || 1);
+    const qty = parseFloat(document.getElementById('iq-' + id)?.value || 1);
     if (!isNaN(price)) total += price * qty;
   });
   document.getElementById('itemsTotalLabel').textContent = 'Total: ' + fmt(total);
 }
 
 function saveManualReceipt() {
-  const store = document.getElementById('mf-store').value.trim();
-  if (!store) { toast('Store name is required', false); return; }
-
-  const items = manualItemRows.map(id => ({
-    name:  document.getElementById('in-' + id)?.value.trim() || '(unnamed)',
-    qty:   parseFloat(document.getElementById('iq-' + id)?.value || 1),
-    price: parseFloat(document.getElementById('ip-' + id)?.value || 0)
-  })).filter(it => it.name && it.name !== '(unnamed)' || it.price);
-
-  const tax   = parseFloat(document.getElementById('mf-tax').value   || 0);
-  const sub   = items.reduce((a, it) => a + it.qty * it.price, 0);
-  const total = sub + tax;
-
-  const r = {
-    id:        uid(),
-    store,
-    date:      document.getElementById('mf-date').value || new Date().toISOString().split('T')[0],
-    mobile:    document.getElementById('mf-mobile').value.trim(),
-    payment:   document.getElementById('mf-pay').value,
-    category:  document.getElementById('mf-cat').value,
-    items,
-    subtotal:  sub,
-    tax,
-    total,
-    notes:     document.getElementById('mf-notes').value.trim(),
-    createdAt: new Date().toISOString()
-  };
-
-  addReceipt(r);
-  toast(`Receipt saved — "${store}" · ${fmt(total)}`);
-  resetManualForm();
+  toast('Manual entry is not supported by the current backend API. Please upload a receipt file.', false);
 }
 
 function resetManualForm() {
-  ['mf-store','mf-mobile','mf-notes'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('mf-pay').value  = '';
-  document.getElementById('mf-cat').value  = '';
-  document.getElementById('mf-tax').value  = '';
+  ['mf-store', 'mf-mobile', 'mf-notes'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('mf-pay').value = '';
+  document.getElementById('mf-cat').value = '';
+  document.getElementById('mf-tax').value = '';
   document.getElementById('mf-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('itemsList').innerHTML = '';
   manualItemRows = [];
@@ -1696,49 +1856,11 @@ function resetManualForm() {
   addItemRow();
 }
 
-/* ─── DASHBOARD ─── */
-function renderDashboard() {
-  const receipts = loadReceipts();
-
-  // Meta
-  if (receipts.length) {
-    const latest = receipts[0];
-    document.getElementById('dashMeta').textContent =
-      `${receipts.length} receipt${receipts.length !== 1 ? 's' : ''} · Last added ${fmtDate(latest.createdAt)}`;
-  }
-
-  // Metrics
-  const totalSpend = receipts.reduce((a, r) => a + (r.total || 0), 0);
-  const avg = receipts.length ? totalSpend / receipts.length : 0;
-
-  animateNumber('m-count', receipts.length, false);
-  animateNumber('m-total', totalSpend, true);
-  animateNumber('m-avg',   avg,         true);
-
-  // Top category
-  const catMap = {};
-  receipts.forEach(r => { if (r.category) catMap[r.category] = (catMap[r.category] || 0) + (r.total || 0); });
-  const topCat = Object.entries(catMap).sort((a,b) => b[1]-a[1])[0];
-  document.getElementById('m-topcat').textContent = topCat ? topCat[0] : '—';
-  document.getElementById('m-topcat-pct').textContent = topCat && totalSpend
-    ? Math.round(topCat[1]/totalSpend*100) + '% of total'
-    : '';
-
-  // Bar chart — group by month
-  renderBarChart(receipts);
-
-  // Donut — by category
-  renderDonut(receipts, catMap, totalSpend);
-
-  // Table
-  renderTable('');
-}
-
 function animateNumber(id, target, currency) {
   const el = document.getElementById(id);
   if (!el) return;
   let start = 0;
-  const step = target / 50;
+  const step = target / 40;
   const timer = setInterval(() => {
     start = Math.min(start + step, target);
     el.textContent = currency ? fmt(start) : Math.floor(start).toLocaleString('en-IN');
@@ -1746,17 +1868,63 @@ function animateNumber(id, target, currency) {
   }, 16);
 }
 
+async function renderDashboard() {
+  try {
+    const receipts = await loadReceipts(true);
+
+    if (receipts.length) {
+      const latest = receipts[0];
+      document.getElementById('dashMeta').textContent =
+        `${receipts.length} receipt${receipts.length !== 1 ? 's' : ''} · Last uploaded ${fmtDate(latest.createdAt)}`;
+    } else {
+      document.getElementById('dashMeta').textContent = 'No receipts yet — upload one to get started.';
+    }
+
+    const totalSpend = receipts.reduce((a, r) => a + (r.total || 0), 0);
+    const avg = receipts.length ? totalSpend / receipts.length : 0;
+
+    animateNumber('m-count', receipts.length, false);
+    animateNumber('m-total', totalSpend, true);
+    animateNumber('m-avg', avg, true);
+
+    const catMap = {};
+    receipts.forEach(r => { if (r.category) catMap[r.category] = (catMap[r.category] || 0) + (r.total || 0); });
+    const topCat = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0];
+    document.getElementById('m-topcat').textContent = topCat ? topCat[0] : '—';
+    document.getElementById('m-topcat-pct').textContent = topCat && totalSpend
+      ? Math.round(topCat[1] / totalSpend * 100) + '% of total'
+      : '';
+
+    try {
+      const insight = await apiFetch('/insights');
+      if (insight && insight.insights) {
+        document.getElementById('m-total-sub').textContent = String(insight.insights).split('.').slice(0, 1).join('.').trim() || 'Across all receipts';
+      }
+    } catch {
+      document.getElementById('m-total-sub').textContent = 'Across all receipts';
+    }
+
+    renderBarChart(receipts);
+    renderDonut(receipts, catMap, totalSpend);
+    renderTable('');
+  } catch (err) {
+    toast(err.message || 'Unable to load dashboard data', false);
+  }
+}
+
 function renderBarChart(receipts) {
   const area = document.getElementById('barChartArea');
   if (!receipts.length) {
-    area.innerHTML = '<div class="empty-state" style="width:100%"><span class="empty-icon">📊</span><p>Upload receipts to see spending trends</p></div>';
+    area.innerHTML = `<div class="empty-state" style="width:100%"><span class="empty-icon">${svgIcon('chart')}</span><p>Upload receipts to see spending trends</p></div>`;
     return;
   }
 
-  // Group by YYYY-MM
   const monthMap = {};
   receipts.forEach(r => {
-    const key = r.date ? r.date.slice(0,7) : 'Unknown';
+    const raw = r.date || '';
+    const key = /^\d{2}\/\d{2}\/\d{4}$/.test(raw)
+      ? `${raw.slice(6)}-${raw.slice(3, 5)}`
+      : (raw.length >= 7 ? raw.slice(0, 7) : 'Unknown');
     monthMap[key] = (monthMap[key] || 0) + (r.total || 0);
   });
 
@@ -1765,35 +1933,34 @@ function renderBarChart(receipts) {
   const maxVal = Math.max(...vals, 1);
 
   area.innerHTML = keys.map((k, i) => {
-    const pct = (vals[i] / maxVal) * 130;
-    const label = k === 'Unknown' ? '?' : new Date(k + '-01').toLocaleDateString('en-IN', { month:'short', year:'2-digit' });
+    const h = (vals[i] / maxVal) * 130;
+    const label = k === 'Unknown' ? '?' : new Date(`${k}-01`).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
     return `<div class="bc-col">
-      <div class="bc-bar" style="height:0px" data-final="${pct.toFixed(0)}px" data-tip="${label}: ${fmt(vals[i])}"></div>
+      <div class="bc-bar" style="height:0px" data-final="${h.toFixed(0)}px" data-tip="${label}: ${fmt(vals[i])}"></div>
       <div class="bc-label">${label}</div>
     </div>`;
   }).join('');
 
   setTimeout(() => {
-    document.querySelectorAll('.bc-bar[data-final]').forEach(b => {
-      b.style.transition = 'height 0.9s cubic-bezier(0.34,1.56,0.64,1)';
-      b.style.height = b.dataset.final;
-    });
-  }, 100);
+    document.querySelectorAll('.bc-bar[data-final]').forEach(b => { b.style.height = b.dataset.final; });
+  }, 90);
 }
-
-const DONUT_COLORS = ['#f5a623','#3ecf8e','#5b8def','#e07070','#c09eff','#ff9f5a','#61dafb','#9998a3'];
 
 function renderDonut(receipts, catMap, totalSpend) {
   const area = document.getElementById('donutArea');
   if (!receipts.length || !Object.keys(catMap).length) {
-    area.innerHTML = '<div class="empty-state"><span class="empty-icon">🍩</span><p>No category data yet</p></div>';
+    area.innerHTML = `<div class="empty-state"><span class="empty-icon">${svgIcon('donut')}</span><p>No category data yet</p></div>`;
     return;
   }
 
-  const sorted = Object.entries(catMap).sort((a,b) => b[1]-a[1]);
-  const R = 50, cx = 70, cy = 70, stroke = 22;
+  const sorted = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+  const R = 50;
+  const cx = 70;
+  const cy = 70;
+  const stroke = 22;
   const circ = 2 * Math.PI * R;
   let offset = 0;
+
   const segments = sorted.map(([cat, val], i) => {
     const pct = val / totalSpend;
     const dash = pct * circ;
@@ -1801,15 +1968,12 @@ function renderDonut(receipts, catMap, totalSpend) {
       stroke="${DONUT_COLORS[i % DONUT_COLORS.length]}"
       stroke-width="${stroke}"
       stroke-dasharray="${dash.toFixed(2)} ${(circ - dash).toFixed(2)}"
-      stroke-dashoffset="${(-offset).toFixed(2)}"
-      stroke-linecap="butt"/>`;
+      stroke-dashoffset="${(-offset).toFixed(2)}"/>`;
     offset += dash;
     return { seg, cat, pct, color: DONUT_COLORS[i % DONUT_COLORS.length] };
   });
 
-  const totalLabel = totalSpend >= 1000
-    ? '₹' + (totalSpend/1000).toFixed(1) + 'K'
-    : fmt(totalSpend);
+  const totalLabel = totalSpend >= 1000 ? `₹${(totalSpend / 1000).toFixed(1)}K` : fmt(totalSpend);
 
   area.innerHTML = `
     <div class="donut-area">
@@ -1826,20 +1990,20 @@ function renderDonut(receipts, catMap, totalSpend) {
           <div class="legend-row">
             <div class="legend-swatch" style="background:${s.color}"></div>
             <div class="legend-name">${s.cat}</div>
-            <div class="legend-pct">${Math.round(s.pct*100)}%</div>
+            <div class="legend-pct">${Math.round(s.pct * 100)}%</div>
           </div>`).join('')}
       </div>
     </div>`;
 }
 
 function renderTable(filter) {
-  const receipts = loadReceipts();
+  const receipts = receiptsCache;
   const q = (filter || document.getElementById('dashSearch')?.value || '').toLowerCase();
   const filtered = q
     ? receipts.filter(r =>
-        (r.store||'').toLowerCase().includes(q) ||
-        (r.category||'').toLowerCase().includes(q) ||
-        (r.mobile||'').includes(q))
+      (r.store || '').toLowerCase().includes(q) ||
+      (r.category || '').toLowerCase().includes(q) ||
+      (r.mobile || '').includes(q))
     : receipts;
 
   const tbody = document.getElementById('receiptsTableBody');
@@ -1847,6 +2011,7 @@ function renderTable(filter) {
     tbody.innerHTML = `<tr><td colspan="7" class="tbl-empty">${receipts.length ? 'No matches.' : 'No receipts yet.'}</td></tr>`;
     return;
   }
+
   tbody.innerHTML = filtered.map(r => `
     <tr>
       <td class="td-main">${r.store || '—'}</td>
@@ -1855,29 +2020,46 @@ function renderTable(filter) {
       <td>${r.items ? r.items.length : 0}</td>
       <td>${r.payment || '—'}</td>
       <td class="td-num">${fmt(r.total)}</td>
-      <td><button onclick="deleteRow('${r.id}')" style="background:var(--red-dim);border:none;border-radius:var(--r-xs);color:var(--red);cursor:pointer;padding:4px 8px;font-size:0.72rem;font-family:var(--font-body)">Delete</button></td>
+      <td><button onclick="deleteRow('${r.id}', this)" title="Delete receipt" style="background:var(--red-dim);border:none;border-radius:var(--r-xs);color:var(--red);cursor:pointer;padding:6px;display:inline-flex;align-items:center;justify-content:center">${svgIcon('trash')}</button></td>
     </tr>`).join('');
 }
 
-function deleteRow(id) {
-  deleteReceipt(id);
-  renderDashboard();
-  toast('Receipt deleted');
+async function deleteRow(id, btnEl) {
+  const button = btnEl;
+  const previous = button ? button.innerHTML : '';
+  try {
+    if (button) {
+      button.disabled = true;
+      button.style.opacity = '0.7';
+      button.innerHTML = '<span class="mini-loader"></span>';
+    }
+    await apiFetch(`/receipts/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    receiptsCache = receiptsCache.filter(r => String(r.id) !== String(id));
+    await renderDashboard();
+    toast('Receipt deleted');
+  } catch (err) {
+    if (button) {
+      button.disabled = false;
+      button.style.opacity = '1';
+      button.innerHTML = previous;
+    }
+    toast(err.message || 'Delete failed', false);
+  }
 }
 
-/* ─── SEARCH ─── */
-let activeFilter = 'all';
-
-function renderSearch() {
-  const receipts = loadReceipts();
-  // Build filter buttons from real categories
-  const cats = [...new Set(receipts.map(r => r.category).filter(Boolean))];
-  const fb = document.getElementById('filterBar');
-  const extra = cats.map(c =>
-    `<button class="filt-btn${activeFilter === c ? ' on' : ''}" data-cat="${c}" onclick="setFilter(this)">${c}</button>`
-  ).join('');
-  fb.innerHTML = `<button class="filt-btn${activeFilter==='all'?' on':''}" data-cat="all" onclick="setFilter(this)">All</button>${extra}`;
-  onSearch();
+async function renderSearch() {
+  try {
+    const receipts = await loadReceipts(true);
+    const cats = [...new Set(receipts.map(r => r.category).filter(Boolean))];
+    const fb = document.getElementById('filterBar');
+    const extra = cats.map(c =>
+      `<button class="filt-btn${activeFilter === c ? ' on' : ''}" data-cat="${c}" onclick="setFilter(this)">${c}</button>`
+    ).join('');
+    fb.innerHTML = `<button class="filt-btn${activeFilter === 'all' ? ' on' : ''}" data-cat="all" onclick="setFilter(this)">All</button>${extra}`;
+    onSearch();
+  } catch (err) {
+    toast(err.message || 'Unable to load search data', false);
+  }
 }
 
 function setFilter(btn) {
@@ -1887,40 +2069,53 @@ function setFilter(btn) {
   onSearch();
 }
 
-function onSearch() {
-  const q = (document.getElementById('searchBox')?.value || '').toLowerCase();
-  let receipts = loadReceipts();
-  if (activeFilter !== 'all') receipts = receipts.filter(r => r.category === activeFilter);
-  if (q) receipts = receipts.filter(r =>
-    (r.store||'').toLowerCase().includes(q) ||
-    (r.mobile||'').includes(q) ||
-    (r.category||'').toLowerCase().includes(q) ||
-    String(r.total).includes(q) ||
-    (r.items||[]).some(it => it.name.toLowerCase().includes(q))
-  );
+async function onSearch() {
+  const qRaw = document.getElementById('searchBox')?.value || '';
+  const q = qRaw.toLowerCase();
+  let receipts = [...receiptsCache];
 
-  document.getElementById('resultCount').textContent =
-    `${receipts.length} receipt${receipts.length !== 1 ? 's' : ''}`;
+  if (activeFilter !== 'all') receipts = receipts.filter(r => r.category === activeFilter);
+
+  if (/^[+\d\s()-]{10,}$/.test(qRaw.trim())) {
+    try {
+      const byMobile = await apiFetch(`/receipts/${encodeURIComponent(qRaw.trim())}`);
+      const mobileRows = Array.isArray(byMobile) ? byMobile.map(normalizeReceipt) : [];
+      receipts = activeFilter === 'all'
+        ? mobileRows
+        : mobileRows.filter(r => r.category === activeFilter);
+    } catch {
+      receipts = [];
+    }
+  } else if (q) {
+    receipts = receipts.filter(r =>
+      (r.store || '').toLowerCase().includes(q) ||
+      (r.mobile || '').includes(q) ||
+      (r.category || '').toLowerCase().includes(q) ||
+      String(r.total).includes(q) ||
+      (r.items || []).some(it => String(it.name || '').toLowerCase().includes(q))
+    );
+  }
+
+  document.getElementById('resultCount').textContent = `${receipts.length} receipt${receipts.length !== 1 ? 's' : ''}`;
 
   const grid = document.getElementById('resultsGrid');
   if (!receipts.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:span 2">
-      <span class="empty-icon">${loadReceipts().length ? '🔍' : '📭'}</span>
-      <p>${loadReceipts().length ? 'No receipts match your search.' : 'Upload some receipts first.'}</p>
-    </div>`;
+    const iconName = receiptsCache.length ? 'search' : 'inbox';
+    const text = receiptsCache.length ? 'No receipts match your search.' : 'Upload some receipts first.';
+    grid.innerHTML = `<div class="empty-state" style="grid-column:span 2"><span class="empty-icon">${svgIcon(iconName)}</span><p>${text}</p></div>`;
     return;
   }
 
   grid.innerHTML = receipts.map((r, i) => `
-    <div class="result-card-item" style="animation-delay:${i*0.04}s">
+    <div class="result-card-item" style="animation-delay:${i * 0.04}s">
       <div class="rci-top">
         <div class="rci-store">${r.store || '—'}</div>
         <div class="rci-amount">${fmt(r.total)}</div>
       </div>
       <div class="rci-meta">
-        <span>📅 ${fmtDate(r.date)}</span>
-        ${r.mobile ? `<span>📱 ${r.mobile}</span>` : ''}
-        <span>📦 ${(r.items||[]).length} item${(r.items||[]).length !== 1 ? 's' : ''}</span>
+        <span>${svgIcon('calendar')} ${fmtDate(r.date)}</span>
+        ${r.mobile ? `<span>${svgIcon('mobile')} ${r.mobile}</span>` : ''}
+        <span>${svgIcon('box')} ${(r.items || []).length} item${(r.items || []).length !== 1 ? 's' : ''}</span>
       </div>
       <div class="rci-tags">
         ${r.category ? `<span class="chip" style="background:${catColor(r.category)}18;color:${catColor(r.category)}">${r.category}</span>` : ''}
@@ -1929,14 +2124,14 @@ function onSearch() {
     </div>`).join('');
 }
 
-/* ─── NAV SCROLL EFFECT ─── */
 window.addEventListener('scroll', () => {
   document.getElementById('nav').style.borderBottomColor =
     window.scrollY > 10 ? 'var(--line2)' : 'var(--line)';
 });
 
-/* ─── INIT ─── */
 document.getElementById('mf-date').value = new Date().toISOString().split('T')[0];
+hydrateIconPlaceholders();
+loadReceipts(true).catch(() => {});
 </script>
 </body>
 </html>
