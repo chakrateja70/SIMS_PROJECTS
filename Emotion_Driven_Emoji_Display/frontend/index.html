@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion-driven Emoji Display</title>
+      <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-gradient"></div>
+    <div class="noise-overlay"></div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🎭</span>
+                <h1 class="logo-text">Emotion<span class="highlight">Display</span></h1>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-label">Faces</span>
+                    <span class="stat-value" id="faceCount">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">FPS</span>
+                    <span class="stat-value" id="fps">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Latency</span>
+                    <span class="stat-value" id="latency">0ms</span>
+                </div>
+                <div class="status-indicator" id="statusIndicator">
+                    <div class="status-dot"></div>
+                    <span id="statusText">Disconnected</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Camera Section -->
+            <div class="camera-section">
+                <div class="camera-container" id="cameraContainer">
+                    <video id="webcam" autoplay playsinline></video>
+                    <canvas id="overlay"></canvas>
+                    
+                    <!-- Loading State -->
+                    <div class="loading-overlay" id="loadingOverlay">
+                        <div class="spinner"></div>
+                        <p>Preparing your camera for emotion analysis...</p>
+                    </div>
+
+
+                    
+                    <!-- No Camera State -->
+                    <div class="no-camera" id="noCameraOverlay" style="display: none;">
+                        <div class="no-camera-icon">📷</div>
+                        <h3>Camera Not Available</h3>
+                        <p>Please grant camera permissions to use this app</p>
+                        <button class="retry-btn" onclick="initCamera()">Retry</button>
+                    </div>
+                </div>
+                <div class="upload-section">
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" id="cameraModeBtn" onclick="switchMode('camera')">
+                            <span>📹</span> Live Camera
+                        </button>
+                        <button class="mode-btn" id="uploadModeBtn" onclick="switchMode('upload')">
+                            <span>📁</span> Upload Image
+                        </button>
+                    </div>
+                    
+                    <div class="upload-container" id="uploadContainer" style="display: none;">
+                        <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                        <button class="upload-btn" onclick="document.getElementById('imageUpload').click()">
+                            <span class="btn-icon">📤</span>
+                            <span class="btn-text">Choose Image</span>
+                        </button>
+                        <div id="uploadPreview" style="display: none;">
+                            <img id="uploadedImage" alt="Uploaded image">
+                            <button class="analyze-btn" onclick="analyzeUploadedImage()">
+                                <span class="btn-icon">🔍</span>
+                                <span class="btn-text">Analyze Emotions</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Controls -->
+                <div class="controls">
+                    <button class="control-btn primary" id="startBtn" onclick="startDetection()">
+                        <span class="btn-icon">▶</span>
+                        <span class="btn-text">Start Live Analysis</span>
+                    </button>
+                    <button class="control-btn secondary" id="stopBtn" onclick="stopDetection()" disabled>
+                        <span class="btn-icon">⏸</span>
+                        <span class="btn-text">Pause Analysis</span>
+                    </button>
+                    <button class="control-btn tertiary" onclick="captureScreenshot()">
+                        <span class="btn-icon">📸</span>
+                        <span class="btn-text">Save Snapshot</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Live Emotions Panel -->
+                <div class="panel">
+                    <h2 class="panel-title">
+                        <span class="panel-icon">😊</span>
+                        Live Emotion Stream
+                    </h2>
+                    <div id="emotionList" class="emotion-list">
+                        <div class="empty-state">
+                            <p>No faces detected</p>
+                            <span class="empty-icon">👤</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="panel">
+                    <h2 class="panel-title">
+                        <span class="panel-icon">⚙️</span>
+                        Display Settings
+                    </h2>
+                    <div class="settings">
+                        <div class="setting-item">
+                            <label for="confidenceThreshold">Confidence Threshold (0–5%)</label>
+                            <input type="range" id="confidenceThreshold" min="0" max="5" value="1" step="0.1">
+                            <span id="confidenceValue">1%</span>
+                        </div>
+                        <div class="setting-item">
+                            <label for="showBbox">Show Bounding Boxes</label>
+                            <input type="checkbox" id="showBbox" checked>
+                        </div>
+                        <div class="setting-item">
+                            <label for="showEmoji">Show Emojis</label>
+                            <input type="checkbox" id="showEmoji" checked>
+                        </div>
+                        <div class="setting-item">
+                            <label for="showConfidence">Show Confidence</label>
+                            <input type="checkbox" id="showConfidence" checked>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by MediaPipe + TensorFlow · Real-time emotion insights from your camera or images.</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
