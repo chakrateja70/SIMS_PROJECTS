@@ -1,0 +1,2137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReceiptScan — Analysis Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN SYSTEM
+═══════════════════════════════════════════ */
+:root {
+  --bg:        #0c0c0e;
+  --surface:   #141416;
+  --surface2:  #1c1c1f;
+  --surface3:  #242428;
+  --line:      rgba(255,255,255,0.07);
+  --line2:     rgba(255,255,255,0.12);
+  --text:      #f0ede8;
+  --text2:     #9998a3;
+  --text3:     #5a5a66;
+  --amber:     #f5a623;
+  --amber-dim: rgba(245,166,35,0.12);
+  --amber-glow:rgba(245,166,35,0.25);
+  --green:     #3ecf8e;
+  --green-dim: rgba(62,207,142,0.1);
+  --red:       #f26060;
+  --red-dim:   rgba(242,96,96,0.1);
+  --blue:      #5b8def;
+  --blue-dim:  rgba(91,141,239,0.1);
+  --r:         16px;
+  --r-sm:      10px;
+  --r-xs:      6px;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Instrument Sans', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  min-height: 100vh;
+  cursor: default;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+/* ── Page system ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ═══════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════ */
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 62px;
+  background: rgba(12,12,14,0.82);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--line);
+}
+.nav-brand {
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 700;
+  color: var(--text); cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  letter-spacing: -0.01em;
+}
+.nav-brand .logo-mark {
+  width: 28px; height: 28px;
+  background: var(--amber);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; color: var(--bg); font-weight: 800;
+}
+.nav-links {
+  display: flex; gap: 2px; align-items: center;
+}
+.nav-link {
+  font-size: 0.82rem; font-weight: 500;
+  color: var(--text2); padding: 6px 14px;
+  border-radius: var(--r-xs); cursor: pointer;
+  transition: all 0.18s ease; border: none; background: none;
+  font-family: var(--font-body);
+}
+.nav-link:hover { color: var(--text); background: var(--surface2); }
+.nav-link.active { color: var(--amber); background: var(--amber-dim); }
+.nav-upload-btn {
+  margin-left: 12px;
+  background: var(--amber);
+  color: var(--bg);
+  border: none; border-radius: var(--r-xs);
+  padding: 7px 16px;
+  font-family: var(--font-body);
+  font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.nav-upload-btn:hover { background: #ffc147; transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════════
+   COMMON COMPONENTS
+═══════════════════════════════════════════ */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em;
+}
+.chip-amber { background: var(--amber-dim); color: var(--amber); }
+.chip-green { background: var(--green-dim); color: var(--green); }
+.chip-red   { background: var(--red-dim);   color: var(--red);   }
+.chip-blue  { background: var(--blue-dim);  color: var(--blue);  }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--amber); color: var(--bg);
+  border: none; border-radius: var(--r-sm);
+  padding: 11px 22px; cursor: pointer;
+  font-family: var(--font-body); font-size: 0.88rem; font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover { background: #ffc147; transform: translateY(-2px); box-shadow: 0 8px 24px var(--amber-glow); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface2); color: var(--text2);
+  border: 1px solid var(--line2); border-radius: var(--r-sm);
+  padding: 11px 22px; cursor: pointer;
+  font-family: var(--font-body); font-size: 0.88rem; font-weight: 500;
+  transition: all 0.2s ease;
+}
+.btn-ghost:hover { color: var(--text); border-color: var(--line2); background: var(--surface3); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+}
+
+.section-eyebrow {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--amber);
+  margin-bottom: 10px;
+}
+.section-heading {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700; line-height: 1.1;
+  letter-spacing: -0.03em; color: var(--text);
+}
+
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; color: var(--text3); text-align: center; gap: 12px;
+}
+.empty-state .empty-icon { width: 40px; height: 40px; opacity: 0.45; color: var(--text3); }
+.empty-state p { font-size: 0.88rem; }
+
+.svg-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1em;
+  height: 1.1em;
+  color: currentColor;
+  vertical-align: middle;
+}
+.svg-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Separator line */
+.sep { border: none; border-top: 1px solid var(--line); margin: 0; }
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+#toast {
+  position: fixed; top: 18px; left: 50%; z-index: 9999;
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.85rem; font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  transform: translate(-50%, -20px); opacity: 0;
+  transition: all 0.28s ease;
+  pointer-events: none;
+  min-width: 260px;
+  max-width: min(92vw, 560px);
+}
+#toast.show { transform: translate(-50%, 0); opacity: 1; }
+.toast-icon { width: 18px; height: 18px; color: currentColor; }
+
+/* ═══════════════════════════════════════════
+   HOME PAGE
+═══════════════════════════════════════════ */
+#page-home {
+  padding-top: 62px;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Grid bg */
+.home-grid-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+}
+
+.home-glow {
+  position: fixed; z-index: 0; pointer-events: none;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(245,166,35,0.07) 0%, transparent 70%);
+  top: -200px; left: 50%; transform: translateX(-50%);
+}
+
+.home-inner {
+  position: relative; z-index: 1;
+  max-width: 1100px; margin: 0 auto;
+  padding: 80px 40px 60px;
+}
+
+/* Hero */
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface2); border: 1px solid var(--line2);
+  padding: 5px 14px 5px 8px; border-radius: 100px;
+  font-size: 0.78rem; font-weight: 500; color: var(--text2);
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s ease both;
+}
+.hero-badge .live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: livePulse 2s infinite;
+}
+@keyframes livePulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.5; transform: scale(1.4); }
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 800; line-height: 1.0;
+  letter-spacing: -0.04em;
+  color: var(--text); margin-bottom: 22px;
+  animation: fadeUp 0.7s 0.1s ease both;
+}
+.hero-title em {
+  font-style: italic; color: var(--amber);
+  display: block;
+}
+
+.hero-sub {
+  font-size: 1.05rem; color: var(--text2); line-height: 1.7;
+  max-width: 520px; margin-bottom: 36px;
+  animation: fadeUp 0.7s 0.2s ease both;
+}
+
+.hero-actions {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  animation: fadeUp 0.7s 0.3s ease both;
+  margin-bottom: 64px;
+}
+
+/* Pipeline visual */
+.pipeline {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 0; position: relative;
+  animation: fadeUp 0.7s 0.4s ease both;
+}
+.pipeline::before {
+  content: '';
+  position: absolute; top: 28px; left: 10%; right: 10%;
+  height: 1px; background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  z-index: 0;
+}
+.pipe-step {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding: 0 12px; position: relative; z-index: 1;
+}
+.pipe-icon {
+  width: 56px; height: 56px;
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text2);
+  transition: all 0.3s ease;
+  cursor: default;
+}
+.pipe-icon .svg-icon { width: 24px; height: 24px; }
+.pipe-step:hover .pipe-icon {
+  background: var(--amber-dim);
+  border-color: var(--amber);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px var(--amber-glow);
+}
+.pipe-label { font-size: 0.75rem; font-weight: 500; color: var(--text2); text-align: center; line-height: 1.4; }
+.pipe-num {
+  position: absolute; top: -8px; right: calc(50% - 36px);
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--amber); color: var(--bg);
+  font-size: 0.6rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Features */
+.features-section {
+  padding: 80px 40px;
+  max-width: 1100px; margin: 0 auto;
+  position: relative; z-index: 1;
+}
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-top: 48px;
+}
+.feat-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 28px;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+.feat-card:hover {
+  border-color: var(--line2);
+  background: var(--surface2);
+  transform: translateY(-3px);
+}
+.feat-icon {
+  width: 26px; height: 26px; margin-bottom: 16px;
+  display: block;
+}
+.feat-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem; font-weight: 600;
+  color: var(--text); margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.feat-desc { font-size: 0.85rem; color: var(--text2); line-height: 1.6; }
+
+/* ═══════════════════════════════════════════
+   UPLOAD PAGE
+═══════════════════════════════════════════ */
+#page-upload { padding-top: 62px; }
+.upload-wrapper {
+  max-width: 860px; margin: 0 auto;
+  padding: 56px 40px;
+}
+
+.upload-mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.mode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-xs);
+  color: var(--text2);
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-btn:hover {
+  color: var(--text);
+  border-color: var(--amber);
+}
+
+.mode-btn.active {
+  color: var(--amber);
+  border-color: rgba(245,166,35,0.4);
+  background: var(--amber-dim);
+}
+
+.upload-drop-zone {
+  border: 2px dashed var(--line2);
+  border-radius: var(--r);
+  padding: 64px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--surface);
+  position: relative; overflow: hidden;
+}
+.upload-drop-zone::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 120%, var(--amber-dim) 0%, transparent 60%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.upload-drop-zone:hover, .upload-drop-zone.over {
+  border-color: var(--amber);
+  background: var(--surface2);
+}
+.upload-drop-zone:hover::before, .upload-drop-zone.over::before { opacity: 1; }
+.upload-drop-zone > * { position: relative; z-index: 1; }
+
+.drop-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--surface3);
+  border: 1px solid var(--line2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text2); margin: 0 auto 20px;
+  transition: transform 0.3s ease;
+}
+.drop-icon .svg-icon { width: 30px; height: 30px; }
+.upload-drop-zone:hover .drop-icon { transform: scale(1.08) translateY(-4px); }
+
+.drop-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 600; color: var(--text);
+  margin-bottom: 8px; letter-spacing: -0.02em;
+}
+.drop-hint { font-size: 0.85rem; color: var(--text3); margin-bottom: 20px; }
+.drop-formats { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.fmt {
+  background: var(--surface3); color: var(--text3);
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em;
+}
+#realFileInput { display: none; }
+
+/* Queue list */
+.upload-queue {
+  margin-top: 24px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.queue-item {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 14px 18px;
+  display: flex; align-items: center; gap: 14px;
+  animation: fadeUp 0.3s ease both;
+}
+.qi-icon { width: 24px; height: 24px; flex-shrink: 0; color: var(--text2); }
+.qi-info { flex: 1; min-width: 0; }
+.qi-name { font-size: 0.88rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qi-size { font-size: 0.75rem; color: var(--text3); margin-top: 2px; }
+.qi-status { flex-shrink: 0; }
+
+.mini-loader {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(242,96,96,0.25);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* Progress bar */
+.progress-bar-wrap {
+  height: 3px; background: var(--surface3); border-radius: 2px;
+  margin-top: 8px; overflow: hidden;
+}
+.progress-bar {
+  height: 100%; background: var(--amber); border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* Process panel */
+.process-panel {
+  display: none;
+  margin-top: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.process-panel.show { display: block; animation: fadeUp 0.3s ease both; }
+
+.process-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: 12px;
+}
+.spin {
+  width: 18px; height: 18px;
+  border: 2px solid var(--line2);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.process-steps { padding: 16px 24px; display: flex; flex-direction: column; gap: 8px; }
+.proc-step {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: var(--r-xs);
+  font-size: 0.85rem; font-weight: 500;
+  transition: all 0.3s ease;
+}
+.proc-step-index {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+.proc-step.idle { color: var(--text3); background: transparent; }
+.proc-step.running {
+  color: var(--amber); background: var(--amber-dim);
+  border: 1px solid rgba(245,166,35,0.2);
+}
+.proc-step.done {
+  color: var(--green); background: var(--green-dim);
+  border: 1px solid rgba(62,207,142,0.15);
+}
+.proc-step-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.proc-step.idle .proc-step-dot    { background: var(--text3); }
+.proc-step.running .proc-step-dot { background: var(--amber); animation: livePulse 1s infinite; }
+.proc-step.done .proc-step-dot    { background: var(--green); }
+
+/* Result card */
+.result-panel {
+  display: none;
+  margin-top: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+}
+.result-panel.show { display: block; }
+.result-top {
+  padding: 22px 28px;
+  background: linear-gradient(135deg, var(--surface2), var(--surface));
+  border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.result-store-name {
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 700;
+  color: var(--text); letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.result-total-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.result-total-val {
+  font-family: var(--font-display);
+  font-size: 2rem; font-weight: 800; color: var(--amber);
+  letter-spacing: -0.03em;
+}
+.result-fields {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--line);
+}
+.result-field {
+  padding: 16px 20px;
+  background: var(--surface);
+}
+.rf-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 5px; }
+.rf-val { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+
+.result-items-section { padding: 22px 28px; }
+.result-items-title {
+  font-family: var(--font-display);
+  font-size: 0.9rem; font-weight: 600;
+  color: var(--text2); margin-bottom: 14px;
+  letter-spacing: -0.01em;
+}
+.line-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0; border-bottom: 1px solid var(--line);
+  font-size: 0.87rem;
+  animation: fadeUp 0.3s ease both;
+}
+.line-item:last-child { border: none; }
+.li-name { color: var(--text2); flex: 1; }
+.li-qty { color: var(--text3); font-size: 0.78rem; padding: 0 16px; }
+.li-price { color: var(--text); font-weight: 600; font-family: var(--font-display); }
+
+.result-actions { padding: 18px 28px; border-top: 1px solid var(--line); display: flex; gap: 10px; }
+
+/* Manual entry form */
+.manual-form {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 28px;
+  margin-top: 24px;
+  animation: fadeUp 0.3s ease both;
+}
+.manual-form.show { display: block; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); }
+.form-input {
+  background: var(--surface2);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-xs);
+  padding: 10px 14px;
+  color: var(--text); font-family: var(--font-body); font-size: 0.88rem;
+  outline: none; transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--amber); }
+.form-input::placeholder { color: var(--text3); }
+
+/* Items editor */
+.items-editor { margin-top: 20px; }
+.items-editor-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px;
+}
+.items-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.item-row { display: flex; gap: 8px; align-items: center; }
+.item-row .form-input { flex: 1; }
+.item-row .form-input.qty  { width: 60px; flex: 0 0 60px; }
+.item-row .form-input.price { width: 90px; flex: 0 0 90px; }
+.remove-item-btn {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--red-dim); border: none; border-radius: var(--r-xs);
+  color: var(--red); cursor: pointer; font-size: 0.8rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.remove-item-btn:hover { background: rgba(242,96,96,0.2); }
+.add-item-btn {
+  background: var(--surface2); border: 1px dashed var(--line2);
+  border-radius: var(--r-xs); padding: 9px;
+  color: var(--text2); font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; width: 100%; font-family: var(--font-body);
+  transition: all 0.2s;
+}
+.add-item-btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+
+/* ═══════════════════════════════════════════
+   DASHBOARD PAGE
+═══════════════════════════════════════════ */
+#page-dashboard { padding-top: 62px; }
+.dash-wrapper {
+  max-width: 1200px; margin: 0 auto;
+  padding: 48px 40px;
+}
+.dash-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 36px;
+}
+.dash-meta { font-size: 0.82rem; color: var(--text3); margin-top: 6px; }
+
+/* Metric cards */
+.metrics-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 28px;
+}
+.metric-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 22px 24px;
+  position: relative; overflow: hidden;
+  transition: all 0.25s ease;
+}
+.metric-card:hover { border-color: var(--line2); transform: translateY(-2px); }
+.metric-card::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+}
+.metric-card:nth-child(1)::after { background: var(--amber); }
+.metric-card:nth-child(2)::after { background: var(--green); }
+.metric-card:nth-child(3)::after { background: var(--blue);  }
+.metric-card:nth-child(4)::after { background: var(--red);   }
+.metric-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 12px; }
+.metric-val {
+  font-family: var(--font-display);
+  font-size: 1.9rem; font-weight: 700; color: var(--text);
+  letter-spacing: -0.03em; line-height: 1;
+  margin-bottom: 6px;
+}
+.metric-sub { font-size: 0.78rem; color: var(--text3); }
+
+/* Charts row */
+.charts-row {
+  display: grid; grid-template-columns: 1.6fr 1fr;
+  gap: 20px; margin-bottom: 28px;
+}
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 24px 26px;
+}
+.chart-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem; font-weight: 600;
+  color: var(--text); margin-bottom: 22px;
+  letter-spacing: -0.01em;
+}
+
+/* Bar chart */
+.bar-chart-area {
+  display: flex; align-items: flex-end;
+  gap: 8px; height: 160px;
+}
+.bc-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bc-bar {
+  width: 100%; border-radius: 4px 4px 0 0;
+  background: var(--amber-dim);
+  border: 1px solid rgba(245,166,35,0.2);
+  min-height: 4px;
+  transition: height 0.9s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative; cursor: pointer;
+}
+.bc-bar:hover { background: var(--amber); }
+.bc-bar::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: var(--surface3); color: var(--text);
+  padding: 4px 9px; border-radius: var(--r-xs);
+  font-size: 0.72rem; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+.bc-bar:hover::after { opacity: 1; }
+.bc-label { font-size: 0.68rem; color: var(--text3); }
+
+/* Category donut — SVG-based */
+.donut-area { display: flex; align-items: center; gap: 20px; }
+.donut-svg-wrap { flex-shrink: 0; }
+.donut-legend { display: flex; flex-direction: column; gap: 9px; }
+.legend-row { display: flex; align-items: center; gap: 8px; }
+.legend-swatch { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.legend-name { font-size: 0.78rem; color: var(--text2); flex: 1; }
+.legend-pct { font-size: 0.78rem; font-weight: 600; color: var(--text); font-family: var(--font-display); }
+
+/* Table */
+.table-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.table-head {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.table-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem; font-weight: 600;
+  color: var(--text); letter-spacing: -0.01em;
+}
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl thead th {
+  padding: 11px 18px;
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--text3); text-align: left;
+  background: var(--surface2);
+}
+.tbl tbody tr {
+  border-top: 1px solid var(--line);
+  transition: background 0.15s;
+}
+.tbl tbody tr:hover { background: var(--surface2); }
+.tbl tbody td { padding: 13px 18px; font-size: 0.85rem; color: var(--text2); }
+.tbl tbody td.td-main { color: var(--text); font-weight: 500; }
+.tbl tbody td.td-num { font-family: var(--font-display); font-weight: 600; color: var(--text); }
+.tbl-empty {
+  padding: 40px; text-align: center;
+  color: var(--text3); font-size: 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
+/* ═══════════════════════════════════════════
+   SEARCH PAGE
+═══════════════════════════════════════════ */
+#page-search { padding-top: 62px; }
+.search-wrapper {
+  max-width: 960px; margin: 0 auto;
+  padding: 56px 40px;
+}
+
+.search-bar-wrap {
+  position: relative; margin-bottom: 20px;
+}
+.search-icon-inner {
+  position: absolute; left: 18px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3); pointer-events: none;
+}
+.search-icon-inner .svg-icon { width: 16px; height: 16px; }
+.search-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  border-radius: var(--r-sm);
+  padding: 15px 20px 15px 48px;
+  color: var(--text);
+  font-family: var(--font-body); font-size: 0.95rem;
+  outline: none; transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--amber); box-shadow: 0 0 0 3px var(--amber-dim); }
+.search-input::placeholder { color: var(--text3); }
+
+.filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+.filt-btn {
+  padding: 6px 14px; border-radius: 100px;
+  border: 1px solid var(--line2);
+  background: var(--surface); color: var(--text2);
+  font-family: var(--font-body); font-size: 0.78rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+.filt-btn:hover, .filt-btn.on { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+
+.results-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px; font-size: 0.82rem; color: var(--text3);
+}
+
+.results-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.result-card-item {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  animation: fadeUp 0.35s ease both;
+}
+.result-card-item:hover {
+  border-color: var(--amber);
+  background: var(--surface2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+.rci-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.rci-store { font-family: var(--font-display); font-size: 1rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.rci-amount { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--amber); }
+.rci-meta { display: flex; gap: 14px; font-size: 0.75rem; color: var(--text3); margin-bottom: 10px; }
+.rci-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ═══════════════════════════════════════════
+   ABOUT PAGE
+═══════════════════════════════════════════ */
+#page-about { padding-top: 62px; }
+.about-wrapper {
+  max-width: 1000px; margin: 0 auto;
+  padding: 60px 40px;
+}
+.about-lead {
+  max-width: 620px; margin-bottom: 64px;
+}
+.about-desc {
+  font-size: 1.05rem; color: var(--text2); line-height: 1.8;
+  margin-top: 20px;
+}
+
+.workflow-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 16px; margin-bottom: 56px;
+}
+.wf-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 26px;
+  position: relative;
+  transition: all 0.25s ease;
+}
+.wf-card:hover { border-color: var(--line2); transform: translateY(-3px); }
+.wf-num {
+  font-family: var(--font-display);
+  font-size: 3rem; font-weight: 800; color: var(--surface3);
+  position: absolute; top: 16px; right: 20px;
+  line-height: 1; user-select: none;
+}
+.wf-step-icon { width: 26px; height: 26px; margin-bottom: 14px; color: var(--text2); }
+.wf-step-title {
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 600; color: var(--text);
+  margin-bottom: 8px; letter-spacing: -0.01em;
+}
+.wf-step-desc { font-size: 0.83rem; color: var(--text2); line-height: 1.6; }
+
+.tech-section { margin-bottom: 40px; }
+.tech-section-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem; font-weight: 700; color: var(--text);
+  letter-spacing: -0.02em; margin-bottom: 20px;
+}
+.tech-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.tech-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 10px 16px;
+  transition: all 0.2s;
+}
+.tech-chip:hover { border-color: var(--line2); background: var(--surface2); }
+.tech-emoji { width: 18px; height: 18px; color: var(--text2); }
+.tech-info .tech-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+.tech-info .tech-role { font-size: 0.72rem; color: var(--text3); }
+
+/* API schema block */
+.api-section { margin-top: 40px; }
+.code-block {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 20px 24px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem; color: var(--text2);
+  line-height: 1.7; overflow-x: auto;
+}
+.code-key   { color: var(--amber); }
+.code-val   { color: var(--green); }
+.code-type  { color: var(--blue);  }
+.code-str   { color: #e07070; }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 28px 40px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 60px;
+}
+.footer-brand {
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+.footer-links { display: flex; gap: 20px; }
+.footer-links span { font-size: 0.8rem; color: var(--text3); cursor: pointer; transition: color 0.2s; }
+.footer-links span:hover { color: var(--text); }
+.footer-copy { font-size: 0.78rem; color: var(--text3); }
+
+/* Responsive */
+@media (max-width: 900px) {
+  #nav { padding: 0 20px; }
+  .home-inner, .upload-wrapper, .dash-wrapper, .search-wrapper, .about-wrapper, .features-section { padding-left: 20px; padding-right: 20px; }
+  .hero-title { font-size: 2.6rem; }
+  .features-grid, .workflow-grid, .tech-row { grid-template-columns: 1fr; }
+  .pipeline { grid-template-columns: repeat(3, 1fr); }
+  .pipeline > .pipe-step:nth-child(4),
+  .pipeline > .pipe-step:nth-child(5) { display: none; }
+  .metrics-row { grid-template-columns: 1fr 1fr; }
+  .charts-row { grid-template-columns: 1fr; }
+  .results-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .result-fields { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast"><span class="toast-icon" id="toastIcon"><span class="svg-icon" data-icon="check"></span></span><span id="toastMsg">—</span></div>
+
+<!-- ─── NAV ─── -->
+<nav id="nav">
+  <div class="nav-brand" onclick="nav('home')">
+    <div class="logo-mark">R</div>
+    ReceiptScan
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" id="nl-home"       onclick="nav('home')">Home</button>
+    <button class="nav-link"        id="nl-upload"     onclick="nav('upload')">Upload</button>
+    <button class="nav-link"        id="nl-dashboard"  onclick="nav('dashboard')">Dashboard</button>
+    <button class="nav-link"        id="nl-search"     onclick="nav('search')">Search</button>
+    <button class="nav-link"        id="nl-about"      onclick="nav('about')">About</button>
+    <button class="nav-upload-btn"  onclick="nav('upload')"><span class="svg-icon" data-icon="upload"></span> Upload</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     HOME
+═══════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="home-grid-bg"></div>
+  <div class="home-glow"></div>
+
+  <div class="home-inner">
+    <div class="hero-badge">
+      <span class="live-dot"></span>
+      Receipt Scanning Analysis Workflow
+    </div>
+    <h1 class="hero-title">
+      Scan, Extract &<br>
+      <em>Understand</em>
+    </h1>
+    <p class="hero-sub">
+      A full-stack AI pipeline that transforms any receipt image into structured data —
+      line items, totals, categories, and actionable spending insights. No templates. No static data.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="nav('upload')">
+        <span class="svg-icon" data-icon="upload"></span> Upload Receipt
+      </button>
+      <button class="btn-ghost" onclick="nav('dashboard')">
+        View Dashboard
+      </button>
+    </div>
+
+    <!-- Pipeline steps -->
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-num">1</div>
+        <div class="pipe-icon"><span class="svg-icon" data-icon="file"></span></div>
+        <div class="pipe-label">Ingest<br>Image / PDF</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">2</div>
+        <div class="pipe-icon"><span class="svg-icon" data-icon="scan"></span></div>
+        <div class="pipe-label">OCR<br>Extraction</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">3</div>
+        <div class="pipe-icon"><span class="svg-icon" data-icon="bot"></span></div>
+        <div class="pipe-label">AI<br>Structuring</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">4</div>
+        <div class="pipe-icon"><span class="svg-icon" data-icon="database"></span></div>
+        <div class="pipe-label">Store &<br>Index</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">5</div>
+        <div class="pipe-icon"><span class="svg-icon" data-icon="chart"></span></div>
+        <div class="pipe-label">Analyse &<br>Insight</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="features-section">
+    <div class="section-eyebrow">Core Capabilities</div>
+    <div class="section-heading">What the workflow delivers</div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <span class="feat-icon svg-icon" data-icon="bolt"></span>
+        <div class="feat-title">Instant OCR</div>
+        <div class="feat-desc">Deep-learning OCR extracts every character, bounding box, and confidence score from any quality image in under 2 seconds.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon svg-icon" data-icon="bot"></span>
+        <div class="feat-title">AI Structuring</div>
+        <div class="feat-desc">Groq LLM parses OCR output into clean JSON fields including customer, mobile, dates, payment mode, item rows, and total amount.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon svg-icon" data-icon="chart"></span>
+        <div class="feat-title">Live Analytics</div>
+        <div class="feat-desc">Your dashboard computes spending trends, category breakdowns, and month-over-month comparisons dynamically from your uploaded data.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon svg-icon" data-icon="search"></span>
+        <div class="feat-title">Smart Search</div>
+        <div class="feat-desc">Full-text search across all receipts by store, item, date, mobile, or amount. Filter by category instantly.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon svg-icon" data-icon="mobile"></span>
+        <div class="feat-title">Mobile Lookup</div>
+        <div class="feat-desc">Associate receipts with a mobile number for per-customer or per-user transaction history and spending summaries.</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-icon svg-icon" data-icon="lock"></span>
+        <div class="feat-title">Secure Storage</div>
+        <div class="feat-desc">Receipts are persisted in PostgreSQL (Neon) with JSONB indexing for fast mobile-number lookup and reliable retrieval.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     UPLOAD
+═══════════════════════════════════════════ -->
+<div class="page" id="page-upload">
+  <div class="upload-wrapper">
+    <div style="margin-bottom:36px">
+      <div class="section-eyebrow">Ingest</div>
+      <h1 class="section-heading" style="font-size:2rem">Upload a Receipt</h1>
+      <p style="font-size:0.88rem;color:var(--text2);margin-top:8px">
+        Upload an image or PDF. After processing you can review and edit the extracted data before saving.
+      </p>
+    </div>
+
+    <div class="upload-mode-switch">
+      <button id="modeUploadBtn" class="mode-btn active" onclick="setUploadMode('upload')">
+        <span class="svg-icon" data-icon="upload"></span> Upload File
+      </button>
+      <button id="modeManualBtn" class="mode-btn" onclick="setUploadMode('manual')">
+        <span class="svg-icon" data-icon="edit"></span> Enter Manually
+      </button>
+    </div>
+
+    <!-- Drop zone -->
+    <div class="upload-drop-zone upload-only" id="dropZone" onclick="document.getElementById('realFileInput').click()">
+      <input type="file" id="realFileInput" accept="image/*,.pdf" multiple onchange="onFilePick(this.files)">
+      <div class="drop-icon" id="dropIcon"><span class="svg-icon" data-icon="upload"></span></div>
+      <div class="drop-title">Drop receipts here</div>
+      <p class="drop-hint">or click to choose files from your device</p>
+      <div class="drop-formats">
+        <span class="fmt">JPG</span><span class="fmt">PNG</span>
+        <span class="fmt">PDF</span><span class="fmt">HEIC</span>
+        <span class="fmt">WEBP</span>
+      </div>
+    </div>
+
+    <!-- File queue -->
+    <div class="upload-queue upload-only" id="uploadQueue"></div>
+
+    <!-- Manual entry form -->
+    <div class="manual-form" id="manualForm">
+      <div style="font-family:var(--font-display);font-size:1rem;font-weight:600;margin-bottom:20px;letter-spacing:-0.01em">
+        Manual Entry
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Store / Vendor Name *</label>
+          <input class="form-input" id="mf-store" placeholder="e.g. My Local Store">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date *</label>
+          <input class="form-input" id="mf-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mobile Number</label>
+          <input class="form-input" id="mf-mobile" placeholder="+91 …">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select class="form-input" id="mf-pay" style="cursor:pointer">
+            <option value="">Select…</option>
+            <option>UPI</option><option>Cash</option>
+            <option>Credit Card</option><option>Debit Card</option><option>Net Banking</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-input" id="mf-cat" style="cursor:pointer">
+            <option value="">Select…</option>
+            <option>Groceries</option><option>Dining</option><option>Shopping</option>
+            <option>Transport</option><option>Medical</option><option>Utilities</option>
+            <option>Entertainment</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tax / GST</label>
+          <input class="form-input" id="mf-tax" type="number" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notes</label>
+          <input class="form-input" id="mf-notes" placeholder="Any additional notes…">
+        </div>
+      </div>
+
+      <div class="items-editor">
+        <div class="items-editor-header">
+          <span style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3)">Line Items</span>
+          <span style="font-size:0.75rem;color:var(--text3)" id="itemsTotalLabel">Total: —</span>
+        </div>
+        <div class="items-list" id="itemsList"></div>
+        <button class="add-item-btn" onclick="addItemRow()">+ Add Item</button>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:22px">
+        <button class="btn-primary" onclick="saveManualReceipt()">Save Receipt</button>
+        <button class="btn-ghost"   onclick="resetManualForm()">Clear</button>
+      </div>
+    </div>
+
+    <!-- Processing panel -->
+    <div class="process-panel upload-only" id="processPanel">
+      <div class="process-header">
+        <div class="spin"></div>
+        <span style="font-size:0.9rem;font-weight:600" id="processTitle">Processing receipt…</span>
+      </div>
+      <div class="process-steps" id="processSteps"></div>
+    </div>
+
+    <!-- Result panel -->
+    <div class="result-panel upload-only" id="resultPanel">
+      <div class="result-top">
+        <div>
+          <div class="result-store-name" id="rp-store">—</div>
+          <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap" id="rp-chips"></div>
+        </div>
+        <div style="text-align:right">
+          <div class="result-total-label">Grand Total</div>
+          <div class="result-total-val" id="rp-total">—</div>
+        </div>
+      </div>
+      <div class="result-fields">
+        <div class="result-field"><div class="rf-label">Date</div><div class="rf-val" id="rp-date">—</div></div>
+        <div class="result-field"><div class="rf-label">Mobile</div><div class="rf-val" id="rp-mobile">—</div></div>
+        <div class="result-field"><div class="rf-label">Payment</div><div class="rf-val" id="rp-pay">—</div></div>
+        <div class="result-field"><div class="rf-label">Category</div><div class="rf-val" id="rp-cat">—</div></div>
+        <div class="result-field"><div class="rf-label">Tax / GST</div><div class="rf-val" id="rp-tax">—</div></div>
+        <div class="result-field"><div class="rf-label">Notes</div><div class="rf-val" id="rp-notes">—</div></div>
+      </div>
+      <div class="result-items-section">
+        <div class="result-items-title">Line Items</div>
+        <div id="rp-items"></div>
+      </div>
+      <div class="result-actions">
+        <button class="btn-primary" onclick="confirmSave()">Confirm & Save</button>
+        <button class="btn-ghost"   onclick="resetUploadPage()">Upload Another</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     DASHBOARD
+═══════════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="dash-wrapper">
+    <div class="dash-header">
+      <div>
+        <div class="section-eyebrow">Analytics</div>
+        <h1 class="section-heading" style="font-size:2rem">Dashboard</h1>
+        <div class="dash-meta" id="dashMeta">No receipts yet — upload one to get started.</div>
+      </div>
+      <button class="btn-primary" onclick="nav('upload')"><span class="svg-icon" data-icon="upload"></span> Add Receipt</button>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-label">Total Receipts</div>
+        <div class="metric-val" id="m-count">0</div>
+        <div class="metric-sub">All time</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Total Spending</div>
+        <div class="metric-val" id="m-total">₹0</div>
+        <div class="metric-sub" id="m-total-sub">Across all receipts</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Average Receipt</div>
+        <div class="metric-val" id="m-avg">₹0</div>
+        <div class="metric-sub">Per transaction</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Top Category</div>
+        <div class="metric-val" id="m-topcat" style="font-size:1.2rem">—</div>
+        <div class="metric-sub" id="m-topcat-pct"></div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Spending by Month</div>
+        <div class="bar-chart-area" id="barChartArea">
+          <div class="empty-state" style="width:100%"><span class="empty-icon svg-icon" data-icon="chart"></span><p>Upload receipts to see spending trends</p></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">By Category</div>
+        <div id="donutArea">
+          <div class="empty-state"><span class="empty-icon svg-icon" data-icon="donut"></span><p>No category data yet</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-head">
+        <div class="table-title">All Receipts</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="dashSearch" placeholder="Filter…"
+            style="background:var(--surface2);border:1px solid var(--line);border-radius:var(--r-xs);padding:6px 12px;color:var(--text);font-family:var(--font-body);font-size:0.8rem;outline:none;width:160px"
+            oninput="renderTable(this.value)">
+        </div>
+      </div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Store</th><th>Date</th><th>Category</th>
+            <th>Items</th><th>Payment</th><th>Total</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="receiptsTableBody">
+          <tr><td colspan="7" class="tbl-empty">No receipts yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SEARCH
+═══════════════════════════════════════════ -->
+<div class="page" id="page-search">
+  <div class="search-wrapper">
+    <div style="margin-bottom:32px">
+      <div class="section-eyebrow">Search</div>
+      <h1 class="section-heading" style="font-size:2rem">Find Any Receipt</h1>
+    </div>
+
+    <div class="search-bar-wrap">
+      <span class="search-icon-inner"><span class="svg-icon" data-icon="search"></span></span>
+      <input class="search-input" id="searchBox"
+        placeholder="Search by store name, item, mobile number, amount…"
+        oninput="onSearch()">
+    </div>
+
+    <div class="filter-bar" id="filterBar">
+      <button class="filt-btn on" data-cat="all" onclick="setFilter(this)">All</button>
+      <!-- Categories populate dynamically -->
+    </div>
+
+    <div class="results-header">
+      <span id="resultCount">0 receipts</span>
+    </div>
+
+    <div class="results-grid" id="resultsGrid">
+      <div class="empty-state" style="grid-column:span 2">
+        <span class="empty-icon svg-icon" data-icon="inbox"></span>
+        <p>Upload some receipts first</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ABOUT
+═══════════════════════════════════════════ -->
+<div class="page" id="page-about">
+  <div class="about-wrapper">
+    <div class="about-lead">
+      <div class="section-eyebrow">Project Overview</div>
+      <h1 class="section-heading">Receipt Scanning<br>Analysis Workflow</h1>
+      <p class="about-desc">
+        A production-grade full-stack pipeline that accepts any receipt image or PDF,
+        runs it through OCR, passes raw text to an LLM for structured extraction,
+        persists results to a database, and surfaces real-time analytics — all with a clean API surface.
+      </p>
+    </div>
+
+    <!-- Workflow steps -->
+    <div class="section-eyebrow" style="margin-bottom:16px">Processing Pipeline</div>
+    <div class="workflow-grid">
+      <div class="wf-card"><div class="wf-num">01</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="inbox"></span></div>
+        <div class="wf-step-title">Ingestion</div>
+        <div class="wf-step-desc">Accept multipart uploads (JPG, JPEG, PNG, PDF) and normalize image/PDF pages for OCR extraction.</div>
+      </div>
+      <div class="wf-card"><div class="wf-num">02</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="scan"></span></div>
+        <div class="wf-step-title">OCR Extraction</div>
+        <div class="wf-step-desc">Tesseract OCR extracts full receipt text after preprocessing with PIL, contrast enhancement, and sharpening.</div>
+      </div>
+      <div class="wf-card"><div class="wf-num">03</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="bot"></span></div>
+        <div class="wf-step-title">AI Structuring</div>
+        <div class="wf-step-desc">Groq-hosted Llama parses OCR text into structured receipt JSON with customer, mobile, dates, payment, items, and total.</div>
+      </div>
+      <div class="wf-card"><div class="wf-num">04</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="database"></span></div>
+        <div class="wf-step-title">Persistence</div>
+        <div class="wf-step-desc">Structured payload is stored in PostgreSQL JSONB with an index on extracted mobile for efficient per-user history queries.</div>
+      </div>
+      <div class="wf-card"><div class="wf-num">05</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="chart"></span></div>
+        <div class="wf-step-title">Analytics</div>
+        <div class="wf-step-desc">Aggregation pipeline computes monthly totals, category breakdowns, per-mobile summaries, and anomaly flags in real time.</div>
+      </div>
+      <div class="wf-card"><div class="wf-num">06</div>
+        <div class="wf-step-icon"><span class="svg-icon" data-icon="globe"></span></div>
+        <div class="wf-step-title">API Surface</div>
+        <div class="wf-step-desc">FastAPI exposes REST endpoints: POST /upload, GET /receipts, GET /receipts/{mobile}, GET /insights — all OpenAPI documented.</div>
+      </div>
+    </div>
+
+    <!-- Tech stack -->
+    <div class="tech-section">
+      <div class="tech-section-title">Technology Stack</div>
+      <div class="tech-row">
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="code"></span><div class="tech-info"><div class="tech-name">FastAPI</div><div class="tech-role">REST Backend</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="bot"></span><div class="tech-info"><div class="tech-name">Groq LLM</div><div class="tech-role">LLM Structuring</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="scan"></span><div class="tech-info"><div class="tech-name">Tesseract OCR</div><div class="tech-role">Text Extraction</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="database"></span><div class="tech-info"><div class="tech-name">PostgreSQL</div><div class="tech-role">Neon Storage</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="globe"></span><div class="tech-info"><div class="tech-name">Vanilla JS SPA</div><div class="tech-role">Frontend</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="package"></span><div class="tech-info"><div class="tech-name">Python Services</div><div class="tech-role">Workflow Runtime</div></div></div>
+        <div class="tech-chip"><span class="tech-emoji svg-icon" data-icon="spark"></span><div class="tech-info"><div class="tech-name">PDFium + PIL</div><div class="tech-role">Image Pre-process</div></div></div>
+      </div>
+    </div>
+
+    <!-- API schema -->
+    <div class="api-section">
+      <div class="tech-section-title">Receipt JSON Schema</div>
+      <div class="code-block">
+<span class="code-key">"receipt"</span>: {<br>
+&nbsp;&nbsp;<span class="code-key">"id"</span>:              <span class="code-type">number</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"customer_name"</span>:   <span class="code-type">string | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"mobile"</span>:          <span class="code-type">string | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"order_date"</span>:      <span class="code-type">DD/MM/YYYY | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"delivery_date"</span>:   <span class="code-type">DD/MM/YYYY | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"payment_mode"</span>:    <span class="code-type">string | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"total_items"</span>:      <span class="code-type">number | null</span>,<br>
+&nbsp;&nbsp;<span class="code-key">"items"</span>: [{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"name"</span>:  <span class="code-type">string</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"qty"</span>:   <span class="code-type">number</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"rate"</span>:  <span class="code-type">number</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"amount"</span>:<span class="code-type">number</span><br>
+&nbsp;&nbsp;}],<br>
+&nbsp;&nbsp;<span class="code-key">"total_amount"</span>:    <span class="code-type">number | null</span><br>
+}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     JS
+═══════════════════════════════════════════ -->
+<script>
+const API_BASE = localStorage.getItem('rsw_api_base') || 'http://127.0.0.1:8000';
+const DONUT_COLORS = ['#f5a623','#3ecf8e','#5b8def','#e07070','#c09eff','#ff9f5a','#61dafb','#9998a3'];
+
+let receiptsCache = [];
+let pendingReceipt = null;
+let manualItemRows = [];
+let activeFilter = 'all';
+
+function iconSvg(name) {
+  const map = {
+    check: '<svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>',
+    x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6l-12 12"/></svg>',
+    upload: '<svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/></svg>',
+    file: '<svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>',
+    scan: '<svg viewBox="0 0 24 24"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M6 12h12"/></svg>',
+    bot: '<svg viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 3v4M9 13h.01M15 13h.01"/></svg>',
+    database: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="7" ry="3"/><path d="M5 5v10c0 1.7 3.1 3 7 3s7-1.3 7-3V5"/></svg>',
+    chart: '<svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V6M16 20v-8M22 20H2"/></svg>',
+    bolt: '<svg viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>',
+    search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+    mobile: '<svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
+    lock: '<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3"/></svg>',
+    edit: '<svg viewBox="0 0 24 24"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M13 6l4 4"/></svg>',
+    donut: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4a8 8 0 0 1 8 8"/></svg>',
+    inbox: '<svg viewBox="0 0 24 24"><path d="M4 4h16l-2 12H6z"/><path d="M8 12h8"/></svg>',
+    globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>',
+    code: '<svg viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 4l-4 16"/></svg>',
+    package: '<svg viewBox="0 0 24 24"><path d="M12 2l8 4-8 4-8-4z"/><path d="M4 6v8l8 4 8-4V6"/></svg>',
+    spark: '<svg viewBox="0 0 24 24"><path d="M12 3l2.2 4.8L19 10l-4.8 2.2L12 17l-2.2-4.8L5 10l4.8-2.2z"/></svg>',
+    image: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 14l3-3 5 5M8 8h.01"/></svg>',
+    pdf: '<svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 16h8"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>',
+    box: '<svg viewBox="0 0 24 24"><path d="M12 2l8 4-8 4-8-4z"/><path d="M4 6v12l8 4 8-4V6"/></svg>',
+    trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M7 7l1 13h8l1-13"/><path d="M10 11v6M14 11v6"/></svg>'
+  };
+  return map[name] || map.file;
+}
+
+function svgIcon(name, cls = '') {
+  return `<span class="svg-icon ${cls}">${iconSvg(name)}</span>`;
+}
+
+function hydrateIconPlaceholders(root = document) {
+  root.querySelectorAll('.svg-icon[data-icon]').forEach(el => {
+    if (el.dataset.hydrated) return;
+    el.innerHTML = iconSvg(el.dataset.icon || 'file');
+    el.dataset.hydrated = '1';
+  });
+}
+
+function toNum(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function fmt(n) {
+  return '₹' + toNum(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
+    const [day, month, year] = d.split('/').map(Number);
+    const dt = new Date(year, month - 1, day);
+    return isNaN(dt) ? d : dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  const dt = new Date(d);
+  return isNaN(dt) ? d : dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function fileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function fileExt(name) {
+  return (name.split('.').pop() || '').toUpperCase();
+}
+
+function catColor(cat) {
+  const map = {
+    Groceries: '#f5a623', Dining: '#3ecf8e', Shopping: '#5b8def',
+    Transport: '#e07070', Medical: '#c09eff', Utilities: '#61dafb',
+    Entertainment: '#ff9f5a', Other: '#9998a3'
+  };
+  return map[cat] || '#9998a3';
+}
+
+function inferCategory(items = []) {
+  const text = items.map(it => String(it.name || '')).join(' ').toLowerCase();
+  if (!text) return 'Other';
+  if (/(rice|milk|oil|atta|dal|sugar|soap|shampoo|vegetable|fruit|masala|grocery)/.test(text)) return 'Groceries';
+  if (/(pizza|meal|restaurant|cafe|snack|juice|tea|coffee)/.test(text)) return 'Dining';
+  if (/(medicine|tablet|syrup|pharma)/.test(text)) return 'Medical';
+  if (/(bus|metro|fuel|petrol|diesel|uber|ola)/.test(text)) return 'Transport';
+  return 'Other';
+}
+
+function toast(msg, ok = true) {
+  const t = document.getElementById('toast');
+  const iconEl = document.getElementById('toastIcon');
+  document.getElementById('toastMsg').textContent = msg;
+  iconEl.innerHTML = ok ? iconSvg('check') : iconSvg('x');
+  t.style.color = ok ? 'var(--green)' : 'var(--red)';
+  t.style.borderColor = ok ? 'rgba(62,207,142,0.3)' : 'rgba(242,96,96,0.3)';
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+async function apiFetch(path, options = {}) {
+  const res = await fetch(`${API_BASE}${path}`, options);
+  const text = await res.text();
+  let body = null;
+  try { body = text ? JSON.parse(text) : null; }
+  catch { body = null; }
+  if (!res.ok) {
+    const detail = body && body.detail ? body.detail : `Request failed (${res.status})`;
+    throw new Error(detail);
+  }
+  return body;
+}
+
+function normalizeReceipt(row) {
+  const data = row && row.data ? row.data : {};
+  const items = Array.isArray(data.items)
+    ? data.items.map(it => ({
+        name: it.name || 'Item',
+        qty: toNum(it.qty) || 1,
+        price: toNum(it.rate),
+        amount: toNum(it.amount) || (toNum(it.qty) || 1) * toNum(it.rate)
+      }))
+    : [];
+
+  const subtotal = items.reduce((sum, it) => sum + it.amount, 0);
+  const total = toNum(data.total_amount) || subtotal;
+
+  return {
+    id: String(row.id || Date.now()),
+    store: data.customer_name || 'DMart Receipt',
+    date: data.order_date || data.delivery_date || (row.uploaded_at || '').slice(0, 10),
+    mobile: data.mobile || '',
+    payment: data.payment_mode || '',
+    category: inferCategory(items),
+    items,
+    subtotal,
+    tax: Math.max(0, total - subtotal),
+    total,
+    notes: '',
+    createdAt: row.uploaded_at || new Date().toISOString()
+  };
+}
+
+async function loadReceipts(force = false) {
+  if (!force && receiptsCache.length) return receiptsCache;
+  const rows = await apiFetch('/receipts');
+  receiptsCache = Array.isArray(rows) ? rows.map(normalizeReceipt) : [];
+  return receiptsCache;
+}
+
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const nl = document.getElementById('nl-' + page);
+  if (nl) nl.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (page === 'dashboard') renderDashboard();
+  if (page === 'search') renderSearch();
+}
+
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('over');
+  onFilePick(e.dataTransfer.files);
+});
+
+async function onFilePick(files) {
+  if (!files || !files.length) return;
+  setUploadMode('upload');
+  const file = files[0];
+  showFileQueue(file);
+  await uploadAndProcess(file);
+}
+
+function showFileQueue(file) {
+  const q = document.getElementById('uploadQueue');
+  q.innerHTML = `
+    <div class="queue-item">
+      <div class="qi-icon">${svgIcon(fileExt(file.name) === 'PDF' ? 'pdf' : 'image')}</div>
+      <div class="qi-info">
+        <div class="qi-name">${file.name}</div>
+        <div class="qi-size">${fileSize(file.size)} · ${fileExt(file.name)}</div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="qProgress" style="width:0%"></div></div>
+      </div>
+      <div class="qi-status"><span class="chip chip-amber">Processing</span></div>
+    </div>`;
+}
+
+function setProcessStep(index, state) {
+  const el = document.getElementById(`ps-${index}`);
+  if (el) el.className = `proc-step ${state}`;
+}
+
+async function uploadAndProcess(file) {
+  const panel = document.getElementById('processPanel');
+  const stepsEl = document.getElementById('processSteps');
+  const bar = document.getElementById('qProgress');
+  const qi = document.querySelector('.qi-status');
+
+  panel.classList.add('show');
+  document.getElementById('processTitle').textContent = `Processing ${file.name}`;
+
+  const steps = [
+    'Uploading receipt to secure server',
+    'Extracting text with OCR engine',
+    'AI is analysing receipt context',
+    'Saving structured data to database'
+  ];
+  stepsEl.innerHTML = steps.map((s, i) => `
+    <div class="proc-step idle" id="ps-${i}">
+      <div class="proc-step-dot"></div><span class="proc-step-index">${i + 1}</span>${s}
+    </div>`).join('');
+
+  try {
+    setProcessStep(0, 'running');
+    if (bar) bar.style.width = '18%';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setProcessStep(1, 'running');
+    if (bar) bar.style.width = '42%';
+    const result = await apiFetch('/upload', { method: 'POST', body: formData });
+
+    setProcessStep(0, 'done');
+    setProcessStep(1, 'done');
+    setProcessStep(2, 'running');
+    if (bar) bar.style.width = '68%';
+
+    const normalized = normalizeReceipt({
+      id: result.id,
+      data: result.data,
+      uploaded_at: new Date().toISOString()
+    });
+    normalized.fileName = file.name;
+    pendingReceipt = normalized;
+
+    setProcessStep(2, 'done');
+    setProcessStep(3, 'running');
+    if (bar) bar.style.width = '86%';
+
+    setProcessStep(3, 'done');
+    if (bar) bar.style.width = '100%';
+    if (qi) qi.innerHTML = `<span class="chip chip-green">${svgIcon('check')} Done</span>`;
+
+    await loadReceipts(true);
+    setTimeout(() => {
+      panel.classList.remove('show');
+      populateResultPanel(normalized);
+      document.getElementById('resultPanel').classList.add('show');
+      toast('Receipt uploaded and saved to backend');
+    }, 300);
+  } catch (err) {
+    if (qi) qi.innerHTML = `<span class="chip chip-red">${svgIcon('x')} Failed</span>`;
+    panel.classList.remove('show');
+    toast(err.message || 'Upload failed', false);
+  }
+}
+
+function populateResultPanel(r) {
+  document.getElementById('rp-store').textContent = r.store || '—';
+  document.getElementById('rp-total').textContent = fmt(r.total);
+  document.getElementById('rp-date').textContent = fmtDate(r.date);
+  document.getElementById('rp-mobile').textContent = r.mobile || '—';
+  document.getElementById('rp-pay').textContent = r.payment || '—';
+  document.getElementById('rp-cat').textContent = r.category || '—';
+  document.getElementById('rp-tax').textContent = fmt(r.tax);
+  document.getElementById('rp-notes').textContent = r.notes || '—';
+
+  const chips = document.getElementById('rp-chips');
+  chips.innerHTML = '';
+  if (r.fileName) chips.innerHTML += `<span class="chip chip-blue">${fileExt(r.fileName)}</span>`;
+  if (r.category) chips.innerHTML += `<span class="chip chip-amber">${r.category}</span>`;
+
+  const itemsEl = document.getElementById('rp-items');
+  if (!r.items || !r.items.length) {
+    itemsEl.innerHTML = '<p style="font-size:0.82rem;color:var(--text3);padding:8px 0">No line items were extracted from this receipt.</p>';
+    return;
+  }
+  itemsEl.innerHTML = r.items.map((it, idx) => `
+    <div class="line-item" style="animation-delay:${idx * 0.05}s">
+      <span class="li-name">${it.name}</span>
+      <span class="li-qty">x${it.qty || 1}</span>
+      <span class="li-price">${fmt(it.amount || (it.qty || 1) * (it.price || 0))}</span>
+    </div>`).join('');
+}
+
+function confirmSave() {
+  if (!pendingReceipt) return;
+  toast('Already saved to backend. Opening dashboard.');
+  nav('dashboard');
+}
+
+function resetUploadPage() {
+  document.getElementById('uploadQueue').innerHTML = '';
+  document.getElementById('processPanel').classList.remove('show');
+  document.getElementById('resultPanel').classList.remove('show');
+  document.getElementById('realFileInput').value = '';
+  pendingReceipt = null;
+  setUploadMode('upload');
+}
+
+function toggleManualForm() {
+  setUploadMode('manual');
+}
+
+function setUploadMode(mode) {
+  const uploadOnly = document.querySelectorAll('.upload-only');
+  const manualForm = document.getElementById('manualForm');
+  const uploadBtn = document.getElementById('modeUploadBtn');
+  const manualBtn = document.getElementById('modeManualBtn');
+  const manual = mode === 'manual';
+
+  uploadOnly.forEach(el => {
+    el.style.display = manual ? 'none' : '';
+  });
+
+  if (manual) {
+    manualForm.classList.add('show');
+    if (!manualItemRows.length) addItemRow();
+  } else {
+    manualForm.classList.remove('show');
+  }
+
+  uploadBtn?.classList.toggle('active', !manual);
+  manualBtn?.classList.toggle('active', manual);
+  document.getElementById('mf-date').value = new Date().toISOString().split('T')[0];
+}
+
+function addItemRow() {
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
+  manualItemRows.push(id);
+  const list = document.getElementById('itemsList');
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.id = 'ir-' + id;
+  row.innerHTML = `
+    <input class="form-input" placeholder="Item name" id="in-${id}" oninput="updateItemsTotal()">
+    <input class="form-input qty" placeholder="Qty" id="iq-${id}" type="number" min="1" value="1" oninput="updateItemsTotal()">
+    <input class="form-input price" placeholder="Price" id="ip-${id}" type="number" min="0" step="0.01" oninput="updateItemsTotal()">
+    <button class="remove-item-btn" onclick="removeItemRow('${id}')">${svgIcon('x')}</button>`;
+  list.appendChild(row);
+}
+
+function removeItemRow(id) {
+  const el = document.getElementById('ir-' + id);
+  if (el) el.remove();
+  manualItemRows = manualItemRows.filter(x => x !== id);
+  updateItemsTotal();
+}
+
+function updateItemsTotal() {
+  let total = 0;
+  manualItemRows.forEach(id => {
+    const price = parseFloat(document.getElementById('ip-' + id)?.value || 0);
+    const qty = parseFloat(document.getElementById('iq-' + id)?.value || 1);
+    if (!isNaN(price)) total += price * qty;
+  });
+  document.getElementById('itemsTotalLabel').textContent = 'Total: ' + fmt(total);
+}
+
+function saveManualReceipt() {
+  toast('Manual entry is not supported by the current backend API. Please upload a receipt file.', false);
+}
+
+function resetManualForm() {
+  ['mf-store', 'mf-mobile', 'mf-notes'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('mf-pay').value = '';
+  document.getElementById('mf-cat').value = '';
+  document.getElementById('mf-tax').value = '';
+  document.getElementById('mf-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('itemsList').innerHTML = '';
+  manualItemRows = [];
+  document.getElementById('itemsTotalLabel').textContent = 'Total: —';
+  addItemRow();
+}
+
+function animateNumber(id, target, currency) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let start = 0;
+  const step = target / 40;
+  const timer = setInterval(() => {
+    start = Math.min(start + step, target);
+    el.textContent = currency ? fmt(start) : Math.floor(start).toLocaleString('en-IN');
+    if (start >= target) clearInterval(timer);
+  }, 16);
+}
+
+async function renderDashboard() {
+  try {
+    const receipts = await loadReceipts(true);
+
+    if (receipts.length) {
+      const latest = receipts[0];
+      document.getElementById('dashMeta').textContent =
+        `${receipts.length} receipt${receipts.length !== 1 ? 's' : ''} · Last uploaded ${fmtDate(latest.createdAt)}`;
+    } else {
+      document.getElementById('dashMeta').textContent = 'No receipts yet — upload one to get started.';
+    }
+
+    const totalSpend = receipts.reduce((a, r) => a + (r.total || 0), 0);
+    const avg = receipts.length ? totalSpend / receipts.length : 0;
+
+    animateNumber('m-count', receipts.length, false);
+    animateNumber('m-total', totalSpend, true);
+    animateNumber('m-avg', avg, true);
+
+    const catMap = {};
+    receipts.forEach(r => { if (r.category) catMap[r.category] = (catMap[r.category] || 0) + (r.total || 0); });
+    const topCat = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0];
+    document.getElementById('m-topcat').textContent = topCat ? topCat[0] : '—';
+    document.getElementById('m-topcat-pct').textContent = topCat && totalSpend
+      ? Math.round(topCat[1] / totalSpend * 100) + '% of total'
+      : '';
+
+    try {
+      const insight = await apiFetch('/insights');
+      if (insight && insight.insights) {
+        document.getElementById('m-total-sub').textContent = String(insight.insights).split('.').slice(0, 1).join('.').trim() || 'Across all receipts';
+      }
+    } catch {
+      document.getElementById('m-total-sub').textContent = 'Across all receipts';
+    }
+
+    renderBarChart(receipts);
+    renderDonut(receipts, catMap, totalSpend);
+    renderTable('');
+  } catch (err) {
+    toast(err.message || 'Unable to load dashboard data', false);
+  }
+}
+
+function renderBarChart(receipts) {
+  const area = document.getElementById('barChartArea');
+  if (!receipts.length) {
+    area.innerHTML = `<div class="empty-state" style="width:100%"><span class="empty-icon">${svgIcon('chart')}</span><p>Upload receipts to see spending trends</p></div>`;
+    return;
+  }
+
+  const monthMap = {};
+  receipts.forEach(r => {
+    const raw = r.date || '';
+    const key = /^\d{2}\/\d{2}\/\d{4}$/.test(raw)
+      ? `${raw.slice(6)}-${raw.slice(3, 5)}`
+      : (raw.length >= 7 ? raw.slice(0, 7) : 'Unknown');
+    monthMap[key] = (monthMap[key] || 0) + (r.total || 0);
+  });
+
+  const keys = Object.keys(monthMap).sort().slice(-8);
+  const vals = keys.map(k => monthMap[k]);
+  const maxVal = Math.max(...vals, 1);
+
+  area.innerHTML = keys.map((k, i) => {
+    const h = (vals[i] / maxVal) * 130;
+    const label = k === 'Unknown' ? '?' : new Date(`${k}-01`).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+    return `<div class="bc-col">
+      <div class="bc-bar" style="height:0px" data-final="${h.toFixed(0)}px" data-tip="${label}: ${fmt(vals[i])}"></div>
+      <div class="bc-label">${label}</div>
+    </div>`;
+  }).join('');
+
+  setTimeout(() => {
+    document.querySelectorAll('.bc-bar[data-final]').forEach(b => { b.style.height = b.dataset.final; });
+  }, 90);
+}
+
+function renderDonut(receipts, catMap, totalSpend) {
+  const area = document.getElementById('donutArea');
+  if (!receipts.length || !Object.keys(catMap).length) {
+    area.innerHTML = `<div class="empty-state"><span class="empty-icon">${svgIcon('donut')}</span><p>No category data yet</p></div>`;
+    return;
+  }
+
+  const sorted = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+  const R = 50;
+  const cx = 70;
+  const cy = 70;
+  const stroke = 22;
+  const circ = 2 * Math.PI * R;
+  let offset = 0;
+
+  const segments = sorted.map(([cat, val], i) => {
+    const pct = val / totalSpend;
+    const dash = pct * circ;
+    const seg = `<circle cx="${cx}" cy="${cy}" r="${R}" fill="none"
+      stroke="${DONUT_COLORS[i % DONUT_COLORS.length]}"
+      stroke-width="${stroke}"
+      stroke-dasharray="${dash.toFixed(2)} ${(circ - dash).toFixed(2)}"
+      stroke-dashoffset="${(-offset).toFixed(2)}"/>`;
+    offset += dash;
+    return { seg, cat, pct, color: DONUT_COLORS[i % DONUT_COLORS.length] };
+  });
+
+  const totalLabel = totalSpend >= 1000 ? `₹${(totalSpend / 1000).toFixed(1)}K` : fmt(totalSpend);
+
+  area.innerHTML = `
+    <div class="donut-area">
+      <div class="donut-svg-wrap">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--surface3)" stroke-width="${stroke}"/>
+          ${segments.map(s => s.seg).join('')}
+          <text x="${cx}" y="${cy - 6}" text-anchor="middle" font-family="Fraunces,serif" font-size="12" font-weight="700" fill="var(--text)">${totalLabel}</text>
+          <text x="${cx}" y="${cy + 9}" text-anchor="middle" font-family="Instrument Sans,sans-serif" font-size="8" fill="var(--text3)">total</text>
+        </svg>
+      </div>
+      <div class="donut-legend">
+        ${segments.map(s => `
+          <div class="legend-row">
+            <div class="legend-swatch" style="background:${s.color}"></div>
+            <div class="legend-name">${s.cat}</div>
+            <div class="legend-pct">${Math.round(s.pct * 100)}%</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderTable(filter) {
+  const receipts = receiptsCache;
+  const q = (filter || document.getElementById('dashSearch')?.value || '').toLowerCase();
+  const filtered = q
+    ? receipts.filter(r =>
+      (r.store || '').toLowerCase().includes(q) ||
+      (r.category || '').toLowerCase().includes(q) ||
+      (r.mobile || '').includes(q))
+    : receipts;
+
+  const tbody = document.getElementById('receiptsTableBody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="tbl-empty">${receipts.length ? 'No matches.' : 'No receipts yet.'}</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(r => `
+    <tr>
+      <td class="td-main">${r.store || '—'}</td>
+      <td>${fmtDate(r.date)}</td>
+      <td>${r.category ? `<span class="chip" style="background:${catColor(r.category)}18;color:${catColor(r.category)}">${r.category}</span>` : '—'}</td>
+      <td>${r.items ? r.items.length : 0}</td>
+      <td>${r.payment || '—'}</td>
+      <td class="td-num">${fmt(r.total)}</td>
+      <td><button onclick="deleteRow('${r.id}', this)" title="Delete receipt" style="background:var(--red-dim);border:none;border-radius:var(--r-xs);color:var(--red);cursor:pointer;padding:6px;display:inline-flex;align-items:center;justify-content:center">${svgIcon('trash')}</button></td>
+    </tr>`).join('');
+}
+
+async function deleteRow(id, btnEl) {
+  const button = btnEl;
+  const previous = button ? button.innerHTML : '';
+  try {
+    if (button) {
+      button.disabled = true;
+      button.style.opacity = '0.7';
+      button.innerHTML = '<span class="mini-loader"></span>';
+    }
+    await apiFetch(`/receipts/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    receiptsCache = receiptsCache.filter(r => String(r.id) !== String(id));
+    await renderDashboard();
+    toast('Receipt deleted');
+  } catch (err) {
+    if (button) {
+      button.disabled = false;
+      button.style.opacity = '1';
+      button.innerHTML = previous;
+    }
+    toast(err.message || 'Delete failed', false);
+  }
+}
+
+async function renderSearch() {
+  try {
+    const receipts = await loadReceipts(true);
+    const cats = [...new Set(receipts.map(r => r.category).filter(Boolean))];
+    const fb = document.getElementById('filterBar');
+    const extra = cats.map(c =>
+      `<button class="filt-btn${activeFilter === c ? ' on' : ''}" data-cat="${c}" onclick="setFilter(this)">${c}</button>`
+    ).join('');
+    fb.innerHTML = `<button class="filt-btn${activeFilter === 'all' ? ' on' : ''}" data-cat="all" onclick="setFilter(this)">All</button>${extra}`;
+    onSearch();
+  } catch (err) {
+    toast(err.message || 'Unable to load search data', false);
+  }
+}
+
+function setFilter(btn) {
+  document.querySelectorAll('.filt-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  activeFilter = btn.dataset.cat;
+  onSearch();
+}
+
+async function onSearch() {
+  const qRaw = document.getElementById('searchBox')?.value || '';
+  const q = qRaw.toLowerCase();
+  let receipts = [...receiptsCache];
+
+  if (activeFilter !== 'all') receipts = receipts.filter(r => r.category === activeFilter);
+
+  if (/^[+\d\s()-]{10,}$/.test(qRaw.trim())) {
+    try {
+      const byMobile = await apiFetch(`/receipts/${encodeURIComponent(qRaw.trim())}`);
+      const mobileRows = Array.isArray(byMobile) ? byMobile.map(normalizeReceipt) : [];
+      receipts = activeFilter === 'all'
+        ? mobileRows
+        : mobileRows.filter(r => r.category === activeFilter);
+    } catch {
+      receipts = [];
+    }
+  } else if (q) {
+    receipts = receipts.filter(r =>
+      (r.store || '').toLowerCase().includes(q) ||
+      (r.mobile || '').includes(q) ||
+      (r.category || '').toLowerCase().includes(q) ||
+      String(r.total).includes(q) ||
+      (r.items || []).some(it => String(it.name || '').toLowerCase().includes(q))
+    );
+  }
+
+  document.getElementById('resultCount').textContent = `${receipts.length} receipt${receipts.length !== 1 ? 's' : ''}`;
+
+  const grid = document.getElementById('resultsGrid');
+  if (!receipts.length) {
+    const iconName = receiptsCache.length ? 'search' : 'inbox';
+    const text = receiptsCache.length ? 'No receipts match your search.' : 'Upload some receipts first.';
+    grid.innerHTML = `<div class="empty-state" style="grid-column:span 2"><span class="empty-icon">${svgIcon(iconName)}</span><p>${text}</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = receipts.map((r, i) => `
+    <div class="result-card-item" style="animation-delay:${i * 0.04}s">
+      <div class="rci-top">
+        <div class="rci-store">${r.store || '—'}</div>
+        <div class="rci-amount">${fmt(r.total)}</div>
+      </div>
+      <div class="rci-meta">
+        <span>${svgIcon('calendar')} ${fmtDate(r.date)}</span>
+        ${r.mobile ? `<span>${svgIcon('mobile')} ${r.mobile}</span>` : ''}
+        <span>${svgIcon('box')} ${(r.items || []).length} item${(r.items || []).length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="rci-tags">
+        ${r.category ? `<span class="chip" style="background:${catColor(r.category)}18;color:${catColor(r.category)}">${r.category}</span>` : ''}
+        ${r.payment ? `<span class="chip chip-blue">${r.payment}</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').style.borderBottomColor =
+    window.scrollY > 10 ? 'var(--line2)' : 'var(--line)';
+});
+
+document.getElementById('mf-date').value = new Date().toISOString().split('T')[0];
+hydrateIconPlaceholders();
+loadReceipts(true).catch(() => {});
+</script>
+</body>
+</html>

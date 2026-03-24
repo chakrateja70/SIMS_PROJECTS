@@ -1,0 +1,79 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-top: #f5fbff;
+  --bg-bottom: #eef7f9;
+  --text-main: #0f172a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-jakarta), "Segoe UI", sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 12% 6%, rgba(14, 165, 233, 0.16), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(20, 184, 166, 0.14), transparent 32%),
+    linear-gradient(165deg, var(--bg-top), var(--bg-bottom));
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-jakarta), "Segoe UI", sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.recording-pulse {
+  position: relative;
+}
+
+.recording-pulse::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 2px solid rgba(244, 63, 94, 0.45);
+  animation: pulse-ring 1.4s ease-out infinite;
+}
+
+.wave-bar {
+  transform-origin: bottom center;
+  animation: voice-wave 1s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+@keyframes voice-wave {
+  0%,
+  100% {
+    transform: scaleY(0.6);
+  }
+  50% {
+    transform: scaleY(1.5);
+  }
+}

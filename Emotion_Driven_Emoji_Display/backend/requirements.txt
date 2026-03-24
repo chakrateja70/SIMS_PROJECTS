@@ -1,0 +1,25 @@
+# Core
+numpy==1.26.4
+protobuf==4.25.3
+h5py==3.11.0
+ml-dtypes==0.2.0
+scipy==1.17.1
+
+# Deep Learning
+tensorflow==2.15.0
+
+# Computer Vision
+opencv-python==4.10.0.84
+mediapipe==0.10.14
+
+# DeepFace
+deepface==0.0.93
+
+# API Server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+python-multipart==0.0.6
+
+# Image Processing
+pillow==10.1.0

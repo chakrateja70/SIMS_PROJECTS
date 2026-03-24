@@ -1,0 +1,12 @@
+__pychache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.env/
+__init__.py
+*.log
+
+.env
+*.env
