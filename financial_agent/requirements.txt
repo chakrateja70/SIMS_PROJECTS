@@ -1,0 +1,14 @@
+phidata # for fetching data from phidata
+python-dotenv # for loading environment variables
+yfinance # for fetching stock data
+packaging # for packaging the code
+duckduckgo-search  # for searching acts like seach engine
+fastapi # for creating API
+uvicorn # for running the API
+jinja2 # for HTML templating
+groq   # for querying the data
+openai # for fetching the data from openai
+httpx  # async HTTP client for Sarvam AI API calls
+python-multipart # multipart form parsing (required for UploadFile in FastAPI)
+slowapi  # rate limiting for FastAPI
+cachetools  # TTL in-memory response cache
