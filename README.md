@@ -2,7 +2,7 @@
 
 A collection of projects built as part of SIMS. Each project lives in its own folder with its own README.
 
-**Total projects: 7**
+**Total projects: 9**
 
 ---
 
@@ -28,6 +28,12 @@ Upload a PDF and ask questions about its content. Uses a RAG pipeline on the bac
 
 ### 7. Receipt Scanning Analysis Workflow
 End-to-end receipt analysis app. Accepts receipt images or PDFs, runs OCR, and uses a Groq LLM for structured data extraction. Stores results in PostgreSQL.
+
+### 8. Hybrid Face Recognition
+Lightweight hybrid face recognition pipeline combining RetinaFace (detection), FaceNet (embeddings), and Pinecone (vector DB). Supports batch video processing, multi-person search, and a FastAPI + single-page web UI with live SSE logs.
+
+### 9. FinAgent — Financial AI Assistant
+Multi-agent AI system with a full web UI, voice input/output, live stock charts, and smart query routing. Built with FastAPI, Phidata, Groq LLMs, Yahoo Finance, and Sarvam AI. Includes Finance, Web Search, and Multi-Agent modes with automatic smart routing.
 
 ---
 
