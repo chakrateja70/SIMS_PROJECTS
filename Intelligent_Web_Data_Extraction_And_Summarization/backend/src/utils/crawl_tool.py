@@ -16,10 +16,10 @@ def _extract_page(raw_page: Any, fallback_url: str) -> PageResult:
 
     if isinstance(raw_page, dict):
         url = raw_page.get("url", fallback_url)
-        md = str(raw_page.get("markdown") or raw_page.get("data") or raw_page)
+        md = str(raw_page.get("markdown") or "")
     else:
-        url = fallback_url
-        md = str(raw_page)
+        url = getattr(raw_page, "url", fallback_url)
+        md = str(getattr(raw_page, "markdown", None) or "")
 
     return PageResult(
         url=url,
@@ -55,7 +55,8 @@ class CrawlTool:
         try:
             raw: Any = await _tool.arun(request.to_payload())
 
-            raw_list: List[Any] = raw if isinstance(raw, list) else [raw]
+            pages: Any = raw.get("data") if isinstance(raw, dict) else raw
+            raw_list: List[Any] = pages if isinstance(pages, list) else [pages]
 
             results = [_extract_page(page, request.url) for page in raw_list]
 

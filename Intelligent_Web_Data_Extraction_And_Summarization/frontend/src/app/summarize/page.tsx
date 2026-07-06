@@ -118,6 +118,7 @@ export default function SummarizePage() {
                     onChange={(event) => setUrl(event.target.value)}
                     placeholder="https://example.com"
                     required
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -154,6 +155,7 @@ export default function SummarizePage() {
                         setMaxPages(Math.min(5, Math.max(1, parsed)));
                       }}
                       required
+                      suppressHydrationWarning
                     />
                   </div>
                 ) : null}
@@ -169,11 +171,12 @@ export default function SummarizePage() {
                     value={focus}
                     onChange={(event) => setFocus(event.target.value)}
                     placeholder="e.g., business model, key updates, financial highlights"
+                    suppressHydrationWarning
                   />
                 </div>
               </div>
 
-              <button className="primary-btn mt-5 w-full" type="submit" disabled={loading}>
+              <button className="primary-btn mt-5 w-full" type="submit" disabled={loading} suppressHydrationWarning>
                 {loading ? "Generating summary..." : "Run Summarize"}
               </button>
 

@@ -19,9 +19,18 @@ def _extract_markdown(raw: object) -> str:
         return raw
 
     if isinstance(raw, dict):
-        return str(raw.get("markdown") or raw.get("data") or raw)
+        data = raw.get("data")
 
-    return str(raw)
+        if isinstance(data, dict):
+            return str(data.get("markdown") or "")
+
+        markdown = getattr(data, "markdown", None)
+        if markdown is not None:
+            return str(markdown)
+
+        return str(raw.get("markdown") or "")
+
+    return str(getattr(raw, "markdown", raw))
 
 
 def _map(exc: Exception) -> AppError:

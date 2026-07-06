@@ -78,7 +78,11 @@ class ScrapeRequest(BaseModel):
         return _validate_url(v)
 
     def to_payload(self) -> dict:
-        return {"url": self.url, "focus": self.focus}
+        return {
+            "url": self.url,
+            "focus": self.focus,
+            "scrape_options": ScrapeOptions().to_payload(),
+        }
 
 
 ScrapeSuccessResponse = SuccessResponse[ScrapeResult]
@@ -103,6 +107,7 @@ class CrawlRequest(BaseModel):
         return {
             "url": self.url,
             "max_pages": self.max_pages,
+            "scrape_options": ScrapeOptions().to_payload(),
         }
 
 

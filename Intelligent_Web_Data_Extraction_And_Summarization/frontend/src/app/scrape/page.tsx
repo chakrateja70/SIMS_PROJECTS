@@ -104,6 +104,7 @@ export default function ScrapePage() {
                     onChange={(event) => setUrl(event.target.value)}
                     placeholder="https://example.com"
                     required
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -118,11 +119,12 @@ export default function ScrapePage() {
                     value={focus}
                     onChange={(event) => setFocus(event.target.value)}
                     placeholder="e.g., key facts, plan details"
+                    suppressHydrationWarning
                   />
                 </div>
               </div>
 
-              <button className="primary-btn mt-5 w-full" type="submit" disabled={loading}>
+              <button className="primary-btn mt-5 w-full" type="submit" disabled={loading} suppressHydrationWarning>
                 {loading ? "Running scrape..." : "Run Scrape"}
               </button>
 

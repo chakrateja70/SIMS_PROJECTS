@@ -130,6 +130,7 @@ export default function CrawlPage() {
                     onChange={(event) => setUrl(event.target.value)}
                     placeholder="https://example.com"
                     required
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -150,6 +151,7 @@ export default function CrawlPage() {
                       setMaxPages(Math.min(5, Math.max(1, parsed)));
                     }}
                     required
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -164,11 +166,12 @@ export default function CrawlPage() {
                     value={focus}
                     onChange={(event) => setFocus(event.target.value)}
                     placeholder="e.g., pricing, features, release notes"
+                    suppressHydrationWarning
                   />
                 </div>
               </div>
 
-              <button className="primary-btn mt-5 w-full" type="submit" disabled={loading}>
+              <button className="primary-btn mt-5 w-full" type="submit" disabled={loading} suppressHydrationWarning>
                 {loading ? "Running crawl..." : "Run Crawl"}
               </button>
 
